@@ -1,0 +1,1055 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VLM Run GTM Build</title>
+<style>
+  :root{
+    --ink:#000; --mute:#555; --line:#000; --bg:#fff;
+    --gap:16px; --stub:22px;
+    --sans: ui-sans-serif, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink)}
+  body{font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:56px 24px 96px}
+
+  /* ---------- header ---------- */
+  .eyebrow{font:500 12px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+  h1{font-size:34px;line-height:1.15;margin:12px 0 10px;letter-spacing:-.01em}
+  .lede{max-width:760px;margin:0 0 28px;color:var(--ink)}
+  .stats{display:grid;grid-template-columns:repeat(5,1fr);border:1px solid var(--line)}
+  .stat{padding:14px 16px;border-right:1px solid var(--line)}
+  .stat:last-child{border-right:0}
+  .stat b{display:block;font-size:22px;line-height:1.1}
+  .stat span{font-size:12.5px;color:var(--mute)}
+  .bar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin:22px 0 8px;flex-wrap:wrap}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--mute)}
+  .legend i{display:inline-block;width:22px;height:12px;border:1px solid var(--ink);vertical-align:-1px;margin-right:6px}
+  .legend i.dash{border-style:dashed}
+  .legend i.heavy{border-width:2px}
+  button{font:500 12px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;background:#fff;color:#000;border:1px solid #000;padding:9px 12px;cursor:pointer}
+  button:hover{background:#000;color:#fff}
+  button:focus-visible, summary:focus-visible{outline:2px solid #000;outline-offset:3px}
+
+  /* ---------- phase ---------- */
+  .phase{position:relative;padding-top:56px}
+  .phase::before{content:"";position:absolute;left:50%;top:0;height:56px;border-left:1px solid var(--line)}
+  .phase:first-of-type::before{display:none}
+  .phead{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;text-align:center}
+  .num{font:700 15px/1 var(--mono);border:1.5px solid var(--ink);padding:9px 10px;background:#fff;position:relative;z-index:1}
+  .pname{font:700 14px/1.2 var(--mono);letter-spacing:.12em;text-transform:uppercase}
+  .tag{font:500 11.5px/1 var(--mono);border:1px solid var(--ink);padding:5px 7px;letter-spacing:.06em}
+  .cost{font:500 12px/1 var(--mono);color:var(--mute)}
+
+  .part{display:flex;align-items:center;gap:14px;margin:56px 0 0;position:relative;z-index:1;background:#fff}
+  .part::before,.part::after{content:"";flex:1;border-top:2px solid var(--line)}
+  .part span{font:700 13px/1.2 var(--mono);letter-spacing:.16em;text-transform:uppercase;text-align:center}
+  .part small{display:block;font:400 12px/1.4 var(--sans);letter-spacing:0;text-transform:none;color:var(--mute);margin-top:4px}
+  .part + .phase{padding-top:28px}
+  .part + .phase::before{height:28px}
+  /* ---------- nodes ---------- */
+  .node{border:1px solid var(--line);background:#fff;text-align:left}
+  .node.main{border-width:2px;max-width:560px;margin:0 auto}
+  .node.gate{border-style:dashed}
+  .node.result{border-width:2px}
+  .node > summary, .node > .sum{display:block;padding:12px 14px;list-style:none;cursor:pointer;position:relative}
+  .node > .sum{cursor:default}
+  .node > summary::-webkit-details-marker{display:none}
+  .node > summary{padding-right:38px}
+  .node > summary::after{content:"i";position:absolute;right:11px;top:12px;width:18px;height:18px;border:1px solid var(--ink);border-radius:50%;font:italic 600 11px/16px Georgia,serif;text-align:center}
+  .node[open] > summary::after{content:"–";font:600 12px/16px var(--mono);font-style:normal}
+  .t{display:block;font-weight:650;font-size:15px;line-height:1.3}
+  .main .t{font-size:17px;text-align:center}
+  .main .m{text-align:center}
+  .m{display:block;font-size:13px;color:var(--mute);margin-top:3px}
+  .more{border-top:1px solid var(--line);padding:12px 14px 14px;font-size:13.5px}
+  .more p{margin:0 0 8px}
+  .more ul{margin:0;padding-left:18px}
+  .more li{margin:3px 0}
+  .more li:last-child,.more p:last-child{margin-bottom:0}
+  .src{display:block;margin-top:10px;font:12px/1.4 var(--mono);color:var(--mute);word-break:break-word}
+  table.mini{border-collapse:collapse;width:100%;font-size:13px;margin:4px 0 2px}
+  table.mini th,table.mini td{border:1px solid #000;padding:5px 7px;text-align:left;vertical-align:top}
+  table.mini th{font-weight:600}
+  table.mini td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+  /* ---------- branches (org-chart connectors) ---------- */
+  .stem{width:0;height:var(--stub);border-left:1px solid var(--line);margin:0 auto}
+  .row{display:flex;gap:var(--gap);align-items:flex-start}
+  .row > .col{flex:1 1 0;min-width:0;position:relative;padding-top:var(--stub)}
+  .row > .col::before{content:"";position:absolute;top:0;left:50%;height:var(--stub);border-left:1px solid var(--line)}
+  .row > .col::after{content:"";position:absolute;top:0;left:calc(var(--gap) / -2);right:calc(var(--gap) / -2);border-top:1px solid var(--line)}
+  .row > .col:first-child::after{left:50%}
+  .row > .col:last-child::after{right:50%}
+  .row > .col:only-child::after{display:none}
+  /* rows that converge back into one line */
+  .row.merge > .col{display:flex;flex-direction:column}
+  .row.merge > .col > .tail{flex:1 0 var(--stub);width:0;border-left:1px solid var(--line);align-self:center}
+  .mergeline{height:0;border-top:1px solid var(--line);margin:0 calc((100% - (var(--n) - 1) * var(--gap)) / (2 * var(--n)))}
+  .step-chain{max-width:620px;margin:0 auto}
+  .count .t{text-align:center}
+  .count .m{text-align:center}
+  .big{font-size:22px;margin-right:4px}
+  .chain{display:flex;flex-direction:column;align-items:stretch}
+  .chain > .node + .stem{height:16px}
+  .arrow{position:relative}
+  .arrow::after{content:"";position:absolute;left:50%;bottom:-1px;transform:translateX(-50%);border:5px solid transparent;border-top:6px solid var(--line);border-bottom:0}
+  .lane{border:1px dashed var(--line);padding:14px;position:relative;margin-top:var(--stub)}
+  .lane-l{position:absolute;top:-9px;left:12px;background:#fff;padding:0 6px;font:500 11.5px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase}
+  .note{max-width:720px;margin:12px auto 0;text-align:center;font-size:13px;color:var(--mute)}
+
+  .node > pre.tree{border-top:1px solid var(--line)}
+  pre.tree{margin:0;font:12.5px/1.55 var(--mono);white-space:pre;overflow-x:auto;padding:16px 18px}
+  .tree b{font-weight:700}
+
+  /* funnel */
+  .funnel{display:flex;align-items:stretch;border:1px solid var(--line)}
+  .funnel > div{flex:1;padding:10px 12px;border-right:1px solid var(--line);text-align:center}
+  .funnel > div:last-child{border-right:0}
+  .funnel b{display:block;font-size:20px;line-height:1.1}
+  .funnel span{font-size:12px;color:var(--mute)}
+
+  /* system loop (phase 8) */
+  .sys{display:grid;grid-template-columns:150px 1fr 170px;border:2px solid var(--line)}
+  .sys > div{padding:10px 12px;border-bottom:1px solid var(--line);font-size:13.5px}
+  .sys > div:nth-last-child(-n+3){border-bottom:0}
+  .sys .k{font:600 12px/1.3 var(--mono);text-transform:uppercase;letter-spacing:.08em;border-right:1px solid var(--line)}
+  .sys .w{border-left:1px solid var(--line);font:12.5px/1.35 var(--mono)}
+  .sys .h{font:600 11.5px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;background:#000;color:#fff}
+  .sys .h:not(:first-child){border-left:1px solid #fff}
+
+  .credits{display:grid;grid-template-columns:repeat(7,1fr);border:1px solid var(--line);margin-top:10px}
+  .credits > div{padding:10px;border-right:1px solid var(--line);text-align:center}
+  .credits > div:last-child{border-right:0;font-weight:700}
+  .credits b{display:block;font-size:17px}
+  .credits span{font-size:11.5px;color:var(--mute)}
+  footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);font-size:12.5px;color:var(--mute);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+  @media (max-width:760px){
+    .wrap{padding:32px 16px 64px}
+    h1{font-size:26px}
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .stat{border-bottom:1px solid var(--line)}
+    .credits{grid-template-columns:repeat(2,1fr)}
+    .credits > div{border-bottom:1px solid var(--line)}
+    .row{flex-direction:column;gap:0;border-left:1px solid var(--line);margin-left:12px;padding-left:14px}
+    .row > .col{padding-top:12px}
+    .row > .col::before{top:30px;left:-14px;width:14px;height:0;border-left:0;border-top:1px solid var(--line)}
+    .row > .col::after{display:none}
+    .row.merge > .col > .tail,.mergeline{display:none}
+    .sys{grid-template-columns:1fr}
+    .sys .k,.sys .w{border:0}
+    .sys .h:not(:first-child){display:none}
+    .funnel{flex-wrap:wrap}
+    .funnel > div{flex:1 1 33%;border-bottom:1px solid var(--line)}
+  }
+  @media print{ details > *:not(summary){display:block} .bar button{display:none} }
+
+  /* ---------- side rails + views ---------- */
+  :root{--hl:#ffe680;--hl-ink:#000;--fill:#c9efd3;--rail:84px}
+  .rail{position:fixed;top:24px;bottom:24px;width:var(--rail);display:flex;align-items:center;justify-content:center;border:2px solid #000;background:#fff;color:#000;text-decoration:none;z-index:20}
+  .rail.l{left:24px} .rail.r{right:24px}
+  .rail span{writing-mode:vertical-rl;transform:rotate(180deg);font:700 17px/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;white-space:nowrap}
+  .rail.r span{transform:none}
+  .rail small{display:block;font:500 12px/1 var(--mono);letter-spacing:.12em;margin-top:14px;color:inherit;opacity:.75}
+  .rail.r{background:var(--hl)}
+  .rail:hover,.rail[aria-current="page"]{background:#000;color:#fff}
+  .rail:focus-visible,.topnav a:focus-visible,.back:focus-visible{outline:3px solid #000;outline-offset:3px}
+  .topnav{display:none;position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid #000}
+  .topnav div{display:flex;max-width:1080px;margin:0 auto}
+  .topnav a{flex:1;text-align:center;padding:12px 8px;font:700 12px/1.2 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:#000;text-decoration:none;border-right:1px solid #000}
+  .topnav a:last-child{border-right:0;background:var(--hl)}
+  .topnav a[aria-current="page"]{background:#000;color:#fff}
+  @media (max-width:1399px){ .rail{display:none} .topnav{display:block} .playnav{top:41px} .play,.doc h3{scroll-margin-top:110px} }
+  [hidden]{display:none!important}
+  .back{display:inline-block;font:600 12px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:#000;margin:0 0 22px;text-decoration:none;border-bottom:1px solid #000;padding-bottom:3px}
+  main.doc .back:last-child{margin:40px 0 0}
+
+  /* write-up */
+  .doc{max-width:760px}
+  .wu-end{margin-top:40px;border-top:1px solid #000;padding-top:14px}
+  .doc h3{font-size:20px;margin:40px 0 10px;display:flex;align-items:center;gap:10px;scroll-margin-top:60px}
+  .doc .sec{font:700 12px/1 var(--mono);border:1.5px solid #000;padding:6px 7px}
+  .doc .part-h{font:700 13px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;border-top:2px solid #000;padding-top:14px;margin:56px 0 0}
+  .doc p,.doc li{font-size:15px}
+  .doc ul,.doc ol{padding-left:20px}
+  .doc li{margin:5px 0}
+  .doc table.mini{font-size:13.5px;margin:10px 0 14px}
+  .doc td.grp{font:700 11.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;background:#f2f2f2}
+  .doc a{color:#000}
+  .toc{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}
+  .toc a{font:600 12px/1 var(--mono);border:1px solid #000;padding:7px 9px;text-decoration:none;color:#000}
+  .toc a:hover{background:#000;color:#fff}
+  code{font:12.5px var(--mono)}
+
+  /* email page */
+  .mailwrap{max-width:900px}
+  mark.var{background:var(--hl);color:var(--hl-ink);padding:0 3px;border-radius:2px;font-weight:600}
+  mark.fill{background:var(--fill);color:#000;padding:0 3px;border-radius:2px}
+  .rules,.cadence{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid #000;margin-top:14px}
+  .rules > div,.cadence > div{padding:12px 14px;border-right:1px solid #000}
+  .rules > div:last-child,.cadence > div:last-child{border-right:0}
+  .rules b,.cadence b{display:block;font-size:19px;line-height:1.15}
+  .rules span,.cadence span{font-size:12.5px;color:var(--mute)}
+  .cadence b{font:700 13px/1.2 var(--mono);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+  .cadence .sig{background:var(--hl)}
+  .cadence .sig span{color:#000}
+  .playnav{display:flex;flex-wrap:wrap;gap:6px;margin:22px 0 0;position:sticky;top:0;background:#fff;padding:10px 0;z-index:5;border-bottom:1px solid #000}
+  .playnav a{font:600 12px/1 var(--mono);border:1px solid #000;padding:8px 10px;text-decoration:none;color:#000}
+  .playnav a:hover{background:#000;color:#fff}
+  .play{margin-top:44px;scroll-margin-top:70px}
+  .playhead{display:flex;align-items:center;gap:12px}
+  .playhead h2{margin:0;font-size:24px}
+  .pl{font:700 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;background:#000;color:#fff;padding:7px 9px}
+  .who{font-size:14px;margin:8px 0 16px}
+  .mails{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .mail{border:1px solid #000;background:#fff;display:flex;flex-direction:column}
+  .mail header{display:flex;gap:10px;align-items:center;padding:9px 12px;border-bottom:1px solid #000;font:12px/1.3 var(--mono);flex-wrap:wrap}
+  .mail .step{font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+  .mail .wc{margin-left:auto;color:var(--mute)}
+  .mail .subj{padding:9px 12px;border-bottom:1px dashed #000;font-size:12.5px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+  .mail .subj code{border:1px solid #000;padding:3px 6px;background:#fff}
+  .mail .body{padding:14px 14px 16px;white-space:pre-line;font-size:15px;line-height:1.6;flex:1}
+  .mail .filled{white-space:pre-line;margin:0 12px 12px;padding:10px 12px;border:1px dashed #000;font-size:13.5px;line-height:1.55}
+  .mail .fl{display:block;font:700 11px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+  .mail .tip{margin:0;padding:9px 12px;border-top:1px solid #000;font-size:12.5px;color:var(--mute)}
+  .mail.signal{border-width:2px}
+  .mail.signal header{background:var(--hl)}
+  .li{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid #000;margin-bottom:16px}
+  .li > div{padding:12px 14px;border-right:1px solid #000}
+  .li > div:last-child{border-right:0}
+  .li b{display:block;font:700 13px/1.2 var(--mono);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+  .li span{font-size:13px}
+  #em-li .mail{margin-top:12px}
+  .foot{font-size:12.5px;color:var(--mute);margin:36px 0 10px}
+  @media (max-width:760px){
+    .mails{grid-template-columns:1fr}
+    .rules,.cadence,.li{grid-template-columns:1fr 1fr}
+    .rules > div,.cadence > div,.li > div{border-bottom:1px solid #000}
+  }
+</style>
+</head>
+<body>
+<a class="rail l" href="#writeup" id="rail-wu"><span>Write-up<small>A1–A6 · B1–B4</small></span></a>
+<a class="rail r" href="#emails" id="rail-em"><span>Email copy<small>B3 · all plays</small></span></a>
+<nav class="topnav" aria-label="Pages"><div><a href="#flow" data-v="flow">Flowchart</a><a href="#writeup" data-v="writeup">Write-up</a><a href="#emails" data-v="emails">Email copy</a></div></nav>
+<section class="view" id="view-flow">
+<main class="wrap">
+
+<!-- ================= HEADER ================= -->
+<div class="eyebrow">OneGTM case study · Client: VLM Run · Built by Bala · 11 Nov 2026</div>
+<h1>From one brief to a hundred accounts and the system that keeps finding them</h1>
+<p class="lede">Every phase of Part A (the list) and Part B (the outreach), in the order we did it. Each box is one step. Click a box with an <b>i</b> to see what happened, what it cost and what we changed. Every number comes from our own logs.</p>
+
+<div class="stats" role="list">
+  <div class="stat" role="listitem"><b>~1,000</b><span>companies pulled in two batches</span></div>
+  <div class="stat" role="listitem"><b>349</b><span>survived the free website read</span></div>
+  <div class="stat" role="listitem"><b>100</b><span>scored 59+ on evidence only</span></div>
+  <div class="stat" role="listitem"><b>1,921</b><span>of 10,000 Blitz credits spent</span></div>
+  <div class="stat" role="listitem"><b>0</b><span>people contacted</span></div>
+</div>
+
+<div class="bar">
+  <div class="legend">
+    <span><i class="heavy"></i>Phase goal / result</span>
+    <span><i></i>Step (click <b>i</b>)</span>
+    <span><i class="dash"></i>Approval gate or batch</span>
+  </div>
+  <button id="toggle" type="button" aria-pressed="false">Expand all</button>
+</div>
+
+<!-- ================= PHASE 0 ================= -->
+<section class="phase" aria-labelledby="p0">
+  <div class="phead"><span class="num">00</span><span class="pname" id="p0">Setup: run it like a client</span><span class="cost">1 credit</span></div>
+  <div class="node main"><div class="sum"><span class="t">One folder, one runbook, one credit log</span><span class="m">Treated VLM Run like a real client account: documented, gated, reproducible</span></div></div>
+  <div class="row">
+    <div class="col">
+      <details class="node"><summary><span class="t">Read the Blitz docs</span><span class="m">Learn the cost model before spending</span></summary>
+        <div class="more"><ul>
+          <li>1 credit = 1 record returned. Empty results are free.</li>
+          <li><b>Sizing trick:</b> <code>max_results: 1</code> returns the total match count, so a whole segment is sized for 1 credit.</li>
+          <li>Key draws from OneGTM's shared 13.5M pool, so our own 10,000 cap has to be self-enforced.</li>
+        </ul><span class="src">02-List-Building/Sourcing/blitz.md</span></div>
+      </details>
+    </div>
+    <div class="col">
+      <details class="node"><summary><span class="t">Credit guard in code</span><span class="m">4,000 working cap · 6,000 reserve</span></summary>
+        <div class="more"><ul>
+          <li><code>blitz.py</code> logs every call (endpoint, request, records, balance) to <code>credit_log.csv</code>.</li>
+          <li>Refuses any pull over 500 records without explicit approval.</li>
+          <li>Rule for every phase: test → verify by hand → scale, always with a cap.</li>
+        </ul><span class="src">Workspace/scripts/blitz.py · 04-Reports/credit-ledger.md</span></div>
+      </details>
+    </div>
+    <div class="col">
+      <details class="node"><summary><span class="t">Questions to the client</span><span class="m">Asked early, because asking is free</span></summary>
+        <div class="more"><ul>
+          <li>Missing Ray Summit / Part 2 file and the "two shared sections".</li>
+          <li>Closed-won list beyond the logo wall.</li>
+          <li>Segments already ruled out, geography, dollar price per credit.</li>
+        </ul><span class="src">00-Brief/questions-for-garrett.md</span></div>
+      </details>
+    </div>
+  </div>
+  <div class="stem arrow"></div>
+  <div class="node result" style="max-width:560px;margin:0 auto"><div class="sum"><span class="t" style="text-align:center">The folder, organised like a client account</span><span class="m" style="text-align:center">Brief → onboarding → list building → outreach → reports → deliverables</span></div>
+  <pre class="tree">VLM Run Case Study/
+├── <b>INDEX.md</b>                  what's where
+├── <b>RUNBOOK.md</b>                plan · gates · log
+├── 00-Brief/                 3 brief PDFs, questions
+├── 01-Onboarding-GTM/
+│   ├── ICP/                  icp, customer anchors
+│   ├── Scorecard/            A3–A5, calibration
+│   └── Segments-and-Market/  A5 + A6
+├── 02-List-Building/
+│   ├── Sourcing/             Blitz notes, recipes
+│   ├── Enrichment/           A2, pilot, plans
+│   └── QA/                   hand-checks
+├── 03-Outreach/
+│   ├── Signals-People-Copy/  B1–B4, titles
+│   └── Side-Quests/          GitHub signal
+├── 04-Reports/               credit ledger
+├── 05-Deliverables/          this diagram, write-up
+└── Workspace/                code + data
+    ├── .env                  API key, never shared
+    ├── scripts/              blitz · merge · fetch
+    │   │                     score · build_top100
+    │   └── queries/          every recipe version
+    ├── data/                 raw/ web/ web2/ b2/
+    │                         *.csv · credit_log.csv
+    └── out/top100.csv        the hundred</pre>
+  </div>
+</section>
+
+<div class="part" role="separator"><span>Part A · Build the list<small>A1–A6: who to sell to, how we found them, how we scored them</small></span></div>
+
+<!-- ================= PHASE 1 ================= -->
+<section class="phase" aria-labelledby="p1">
+  <div class="phead"><span class="num">01</span><span class="pname" id="p1">ICP + search recipes</span><span class="tag">A1</span><span class="cost">269 credits</span></div>
+  <div class="node main"><div class="sum"><span class="t">Who buys, and how do we find more of them?</span><span class="m">Start from the 4 real customers, not from guesses</span></div></div>
+  <div class="row">
+    <div class="col">
+      <details class="node"><summary><span class="t">Study the real customers</span><span class="m">Valerie Health · Scan.com · Basata · CivilGrid</span></summary>
+        <div class="more"><ul>
+          <li>Looked each up in Blitz (15 credits).</li>
+          <li><b>Pattern:</b> small vertical software companies (10–200 people) whose product eats messy paperwork. VLM Run sits inside their product.</li>
+          <li>Industry labels are all over the place (4 labels for 4 customers), so description keywords have to do the work.</li>
+          <li>Peak Health: the guessed domain matched the wrong company. Excluded. Lesson: verify domains from the source.</li>
+        </ul><span class="src">01-Onboarding-GTM/ICP/customer-anchors.md</span></div>
+      </details>
+    </div>
+    <div class="col">
+      <details class="node"><summary><span class="t">7 segment hypotheses</span><span class="m">Health ops, construction, insurance, lending, logistics, robotics, video AI</span></summary>
+        <div class="more"><ul>
+          <li>Ranked by evidence: healthcare ops = 3 of 4 customers (high). Construction = CivilGrid (medium). The rest = tests.</li>
+          <li><b>Out:</b> doc-AI competitors, integration partners, services shops, &gt;1,000 employees, the hospitals/GCs themselves.</li>
+        </ul><span class="src">01-Onboarding-GTM/ICP/icp.md</span></div>
+      </details>
+    </div>
+    <div class="col">
+      <details class="node"><summary><span class="t">Recipes v1 → v4</span><span class="m">Size → sample 10–15 → hand-check → fix</span></summary>
+        <div class="more"><ul>
+          <li>v1 loose searches matched ~12,000 companies, about 70% junk.</li>
+          <li><b>Biggest fix:</b> software-only industries. Construction went from 0 good to 6 of 10.</li>
+          <li>Multi-word phrases are AND-of-words ("physical AI" matched a physical-therapy EHR).</li>
+          <li>Competitors look exactly like prospects → blocklist of 29 names.</li>
+        </ul><span class="src">02-List-Building/Sourcing/sourcing-recipes.md · 02-List-Building/QA/phase1-handcheck.md</span></div>
+      </details>
+    </div>
+  </div>
+  <div class="stem"></div>
+  <div class="row">
+    <div class="col">
+      <details class="node"><summary><span class="t">Kept 6 recipes</span><span class="m">S1–S6, each sized for 1 credit</span></summary>
+        <div class="more"><table class="mini">
+          <tr><th>Recipe</th><th>Matches</th><th>Hit rate in test</th></tr>
+          <tr><td>S1 Health ops</td><td class="n">762</td><td>4 / 10</td></tr>
+          <tr><td>S2 Construction</td><td class="n">342</td><td>6 / 10</td></tr>
+          <tr><td>S3 Insurance</td><td class="n">205</td><td>4 / 10</td></tr>
+          <tr><td>S4 Lending</td><td class="n">303</td><td>4 / 10</td></tr>
+          <tr><td>S5 Logistics</td><td class="n">159</td><td>6 / 10</td></tr>
+          <tr><td>S6 Robotics</td><td class="n">962</td><td>test segment</td></tr>
+        </table><span class="src">Workspace/scripts/queries/*.json</span></div>
+      </details>
+    </div>
+    <div class="col">
+      <details class="node"><summary><span class="t">Dropped 2 recipes</span><span class="m">Video AI · CV-engineer hiring</span></summary>
+        <div class="more"><ul>
+          <li><b>S7 Video AI:</b> 3 of 15 "maybe", mostly generative video and ad tech.</li>
+          <li><b>J2 CV hiring:</b> teams hiring core CV engineers are building their own (build, not buy). Kept as a signal idea instead.</li>
+          <li>J1 document-AI hiring: low volume, highest intent → saved for signals.</li>
+        </ul></div>
+      </details>
+    </div>
+    <div class="col">
+      <details class="node gate"><summary><span class="t">Gate: Bala cuts the pull</span><span class="m">Proposed 1,660 → approved 600</span></summary>
+        <div class="more"><p>100 per segment × 6. Pull small, learn, then decide whether the rest is worth paying for.</p></div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PHASE 2 ================= -->
+<section class="phase" aria-labelledby="p2">
+  <div class="phead"><span class="num">02</span><span class="pname" id="p2">Pull companies · batch 1</span><span class="tag">A1</span><span class="cost">656 credits</span></div>
+  <div class="node main"><div class="sum"><span class="t">Pull 50 → read every row → decide → pull 50</span><span class="m">Optimise the search while it runs, per segment</span></div></div>
+  <div class="row">
+    <div class="col">
+      <details class="node"><summary><span class="t">Resume the same query</span><span class="m">Insurance · lending · logistics · healthcare</span></summary>
+        <div class="more"><ul>
+          <li>Changing a filter restarts results at page 1, so you pay again for rows you already have.</li>
+          <li>Junk here was cheap to remove locally, so we resumed instead of re-filtering.</li>
+          <li>Finds: Avallon AI, Heron Data, Two Dots, KlearNow, Alvys, Humata.</li>
+        </ul></div>
+      </details>
+    </div>
+    <div class="col">
+      <details class="node"><summary><span class="t">Re-filter mid-pull</span><span class="m">Construction v6 · robotics v6</span></summary>
+        <div class="more"><ul>
+          <li>Construction: "reality capture" pulled motion-capture companies. Re-filtered.</li>
+          <li>Robotics: half were integrators or hardware. Tilted to robot learning, autonomy and teleop.</li>
+          <li>Re-filter only when it saves more junk than it re-buys (~15 dupes in robotics).</li>
+        </ul></div>
+      </details>
+    </div>
+    <div class="col">
+      <details class="node gate"><summary><span class="t">One mistake: "as-built"</span><span class="m">−50 credits, rule added</span></summary>
+        <div class="more"><p>The hyphen split it into "as" + "built", which matched 1,754 random companies. 50 junk rows are kept as evidence in <code>data/raw/discarded/</code>.</p><p><b>New rule:</b> size after every filter change, before pulling.</p></div>
+      </details>
+    </div>
+  </div>
+  <div class="stem arrow"></div>
+  <details class="node result" style="max-width:560px;margin:0 auto"><summary><span class="t" style="text-align:center">609 unique → 44 excluded → 565 candidates</span><span class="m" style="text-align:center">Free local merge, every exclusion keeps its reason</span></summary>
+    <div class="more"><ul>
+      <li>21 horizontal doc-AI competitors, 15 acquired/shell pages, 5 bad domains, 3 manual (Tennr built its own VLM).</li>
+      <li><b>Judgment call:</b> vertical doc-AI apps use the same words as competitors but are the ICP (same shape as Valerie Health). Kept and flagged "build or buy?".</li>
+      <li>Moved to the Google Sheet: README, Candidates, Excluded, Credit Ledger.</li>
+    </ul><span class="src">Workspace/scripts/merge.py · 02-List-Building/Sourcing/phase2-pull-log.md</span></div>
+  </details>
+</section>
+
+<!-- ================= PHASE 3 ================= -->
+<section class="phase" aria-labelledby="p3">
+  <div class="phead"><span class="num">03</span><span class="pname" id="p3">Enrich: free data and signals first, paid last</span><span class="tag">A2</span><span class="cost">169 credits</span></div>
+  <div class="node main"><div class="sum"><span class="t">Is messy visual input core to their product?</span><span class="m">Cut with free data first. Pay only for the companies that survive.</span></div></div>
+  <div class="stem arrow"></div>
+  <div class="chain step-chain">
+    <details class="node"><summary><span class="t">Calibrate the rubric on known answers</span><span class="m">4 of 4 real customers survive · 4 of 4 known junk cut · 12 credits</span></summary>
+      <div class="more"><p>Before trusting the rubric on 565 companies, we ran it on VLM Run's real customers and on obvious junk. It sorted all 8 correctly, so we used it unchanged.</p><span class="src">01-Onboarding-GTM/Scorecard/phase3-calibration.md</span></div>
+    </details>
+    <div class="stem arrow"></div>
+    <div class="node result count"><div class="sum"><span class="t"><b class="big">565</b> companies sourced from Blitz</span><span class="m">With the data Blitz already gave us: about text, industry, size, HQ</span></div></div>
+    <div class="stem arrow"></div>
+    <details class="node"><summary><span class="t">Pass 1 · read each company's Blitz "about" text against the rubric</span><span class="m">Free (data already paid for) · 333 disqualified, each with its reason</span></summary>
+      <div class="more"><table class="mini">
+        <tr><th>Why it was cut</th><th>Companies</th></tr>
+        <tr><td>Core product isn't messy visual input</td><td class="n">226</td></tr>
+        <tr><td>Services shop, not a software product</td><td class="n">51</td></tr>
+        <tr><td>Operator (the hospital, carrier or contractor itself)</td><td class="n">25</td></tr>
+        <tr><td>Builds its own vision models (build, not buy)</td><td class="n">12</td></tr>
+        <tr><td>Acquired or defunct</td><td class="n">10</td></tr>
+        <tr><td>Media / publisher</td><td class="n">9</td></tr>
+      </table><span class="src">Workspace/data/pass1.csv · rubric Workspace/scripts/enrich_prompt.md</span></div>
+    </details>
+    <div class="stem arrow"></div>
+    <div class="node result count"><div class="sum"><span class="t"><b class="big">232</b> companies left</span></div></div>
+    <div class="stem arrow"></div>
+    <details class="node"><summary><span class="t">Pass 2 · read their own website</span><span class="m">Free · product, security, integrations, developer and careers pages · 38 disqualified</span></summary>
+      <div class="more"><ul>
+        <li>Each page answers one question: what enters the product, regulated data, which OCR tool they use today, whether they're developer-led.</li>
+        <li>Saved for every company: visual core (yes / partly), modalities, a word-for-word evidence quote + URL, and flags (OCR, REG, DEP, VID, OWN).</li>
+        <li>Cut: 37 whose product turned out not to be visual once the site was read, 1 that built its own VLM (PackageX).</li>
+        <li>26 sites couldn't be read (JavaScript walls), so we fell back to the Blitz text and flagged them.</li>
+      </ul><span class="src">Workspace/scripts/fetch_web.py · fetch_deep.py · Workspace/data/web2/</span></div>
+    </details>
+    <div class="stem arrow"></div>
+    <div class="node result count"><div class="sum"><span class="t"><b class="big">194</b> companies qualify</span><span class="m">Only these get paid data</span></div></div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <details class="node"><summary><span class="t">Hiring signal</span><span class="m">Free job boards first, then Blitz jobs · 28 credits</span></summary>
+        <div class="more"><ul>
+          <li>35 companies checked on their public job boards (Greenhouse, Lever, Ashby, Workable). Free.</li>
+          <li>104 checked with Blitz jobs data. Empty results are free, so it cost 28 credits.</li>
+          <li><b>Result:</b> 29 companies hiring ML/AI engineers right now.</li>
+        </ul><span class="src">Workspace/scripts/jobs.py · Workspace/data/jobs.csv</span></div>
+      </details>
+    </div>
+    <div class="col">
+      <details class="node"><summary><span class="t">Engineering team share</span><span class="m">Blitz department data · 1 credit per company</span></summary>
+        <div class="more"><ul>
+          <li>How many engineers each company has, and what share of staff that is. Tells us whether they can integrate an API.</li>
+          <li>129 credits for the strongest 130 in this phase, then the other 64 at the start of Phase 4, so all 194 are covered.</li>
+          <li>Blitz's docs say this data is free. It actually costs 1 credit per company. We caught that on the first few calls.</li>
+        </ul><span class="src">Workspace/scripts/dept.py · Workspace/data/dept.csv</span></div>
+      </details>
+    </div>
+  </div>
+  <div class="stem arrow"></div>
+  <div class="node result" style="max-width:560px;margin:0 auto"><div class="sum"><span class="t" style="text-align:center">194 enriched companies → scoring</span><span class="m" style="text-align:center">169 credits in total: 12 calibration + 129 engineering + 28 hiring</span></div></div>
+</section>
+
+<!-- ================= PHASE 4 ================= -->
+<section class="phase" aria-labelledby="p4">
+  <div class="phead"><span class="num">04</span><span class="pname" id="p4">Score on evidence only</span><span class="tag">A3</span><span class="cost">64 credits</span></div>
+  <div class="node main"><div class="sum"><span class="t">100-point scorecard, every point with a source</span><span class="m">70 points for the need · 30 for the buyer · penalties for build-own</span></div></div>
+  <div class="row">
+    <div class="col">
+      <details class="node"><summary><span class="t">The need · 70</span><span class="m">Visual core 30 · messy 10 · modality 15 · extracting today 15</span></summary>
+        <div class="more"><ul>
+          <li>Visual core: yes 30, partly 12.</li>
+          <li>Messy input: fax, handwriting, scans, phone photos.</li>
+          <li>Modality: docs 5 · images 10 · video 15 (VLM Run's edge).</li>
+          <li>Extracting today: OCR, IDP or GPT/Claude stack = existing budget.</li>
+        </ul></div>
+      </details>
+    </div>
+    <div class="col">
+      <details class="node"><summary><span class="t">The buyer · 30</span><span class="m">Sensitive data 10 · timing 10 · buyable 10</span></summary>
+        <div class="more"><ul>
+          <li>Sensitive: HIPAA/PII 6 + VPC/on-prem/ZDR 4. SOC 2 alone doesn't count.</li>
+          <li>Timing: ML/AI hiring 7 + "launching soon" 3.</li>
+          <li>Buyable: 10–300 people 6 + ≥5 engineers 4.</li>
+        </ul></div>
+      </details>
+    </div>
+    <div class="col">
+      <details class="node"><summary><span class="t">Penalties</span><span class="m">Own vision −15 · services −10 · acquired −8</span></summary>
+        <div class="more"><p>A perfect buyer with no visual workload can't score above ~42.</p><span class="src">Workspace/scripts/score.py</span></div>
+      </details>
+    </div>
+  </div>
+  <div class="stem"></div>
+  <div class="row">
+    <div class="col">
+      <details class="node result"><summary><span class="t">Calibration</span><span class="m">Real customers land #8, #10, #12, #71</span></summary>
+        <div class="more"><p>No weight tuning needed. Scored with the same rules as everyone else.</p></div>
+      </details>
+    </div>
+    <div class="col">
+      <details class="node result"><summary><span class="t">Stability</span><span class="m">Each weight ±20%: worst case 93 of 100 unchanged</span></summary>
+        <div class="more"><p>34 runs, average 99.3 of 100 unchanged. The ranking doesn't hinge on one weight.</p></div>
+      </details>
+    </div>
+    <div class="col">
+      <details class="node result"><summary><span class="t">10 rows by hand</span><span class="m">4 fake points found → 4 rule fixes</span></summary>
+        <div class="more"><ul>
+          <li>Trust-center text, a marketing "watch video", a dated blog headline, weak quotes.</li>
+          <li>Evidence now only counts from product/home/integrations/developer pages.</li>
+          <li>Then every top-100 quote checked word for word: 100/100 verbatim.</li>
+        </ul><span class="src">02-List-Building/QA/handcheck_10.md</span></div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PHASE 5 ================= -->
+<section class="phase" aria-labelledby="p5">
+  <div class="phead"><span class="num">05</span><span class="pname" id="p5">Batch 2 → the hundred + segments</span><span class="tag">A4</span><span class="tag">A5</span><span class="cost">762 credits</span></div>
+  <div class="node main"><div class="sum"><span class="t">Raise the bar: learn from the top scorers, pull lookalikes</span><span class="m">Batch 1's #100 scored only 42</span></div></div>
+  <div class="lane"><span class="lane-l">Batch 2 · reran phases 2–4</span>
+    <div class="chain">
+      <details class="node"><summary><span class="t">Commonalities of top scorers</span><span class="m">Software dev · founded 2010+ · 15–470 staff · intake / automation words</span></summary>
+        <div class="more"><p>The first 609 companies were held out so nothing was bought twice.</p></div>
+      </details>
+      <div class="stem arrow"></div>
+      <details class="node"><summary><span class="t">6 lookalike + 6 geo recipes + video v2</span><span class="m">US/GB/CA, then AU, NZ, IE, IL, SG, NL</span></summary>
+        <div class="more"><table class="mini">
+          <tr><th>Step</th><th>Credits</th></tr>
+          <tr><td>Lookalike sourcing (6 segments)</td><td class="n">470</td></tr>
+          <tr><td>Geo recipes (0 dupes, small pools)</td><td class="n">45</td></tr>
+          <tr><td>Video-first re-cut</td><td class="n">76</td></tr>
+          <tr><td>Eng headcount, 155 survivors</td><td class="n">153</td></tr>
+          <tr><td>Hiring check, 148 companies</td><td class="n">18</td></tr>
+        </table><span class="src">Workspace/scripts/queries/batch2/</span></div>
+      </details>
+      <div class="stem arrow"></div>
+      <div class="node"><div class="sum"><span class="t">432 new → 155 kept → 349 combined pool</span><span class="m">Same free website read, same scorecard, rescored together</span></div></div>
+    </div>
+  </div>
+  <div class="stem arrow"></div>
+  <details class="node result" style="max-width:560px;margin:0 auto"><summary><span class="t" style="text-align:center">The hundred: #1 Avallon AI 85 · #100 TrialView 59</span><span class="m" style="text-align:center">#100 rose 42 → 59 · 97 at 60+ · 49 from batch 2</span></summary>
+    <div class="more"><ul>
+      <li>Combined calibration: Basata #14, CivilGrid #17, Valerie Health #26. Scan.com fell to #135 as the bar rose (it was always the "partly" customer).</li>
+      <li>Robotics dropped out: best is Mind Robotics at #127. None showed video extraction today.</li>
+      <li>Every row: per-criterion scores, segment, title to contact, verbatim quote + URL.</li>
+    </ul><span class="src">Workspace/out/top100.csv · Sheet tabs Top 100, Scored, Enriched</span></div>
+  </details>
+  <div class="row">
+    <div class="col">
+      <details class="node"><summary><span class="t">A · Regulated doc intake</span><span class="m">59 accounts · health, insurance, lending, legal</span></summary>
+        <div class="more"><p>Faxes, referrals, ACORD forms, pay stubs. Lead with accuracy on messy docs + ZDR, BAA, VPC. Proof: Valerie Health, Scan.com.</p></div>
+      </details>
+    </div>
+    <div class="col">
+      <details class="node"><summary><span class="t">B · Field &amp; freight</span><span class="m">28 accounts · construction, logistics</span></summary>
+        <div class="more"><p>Drivers photograph BOLs and PODs; jobsite photos and plans. Lead with docs + photos in one API. Proof: CivilGrid.</p></div>
+      </details>
+    </div>
+    <div class="col">
+      <details class="node"><summary><span class="t">C · Video-first</span><span class="m">13 accounts · dash cams, video inspection</span></summary>
+        <div class="more"><p>Footage at scale that needs searching. Buyer is the ML/data team. No customer proof yet.</p></div>
+      </details>
+    </div>
+    <div class="col">
+      <details class="node gate"><summary><span class="t">Leave out</span><span class="m">Competitors · built their own VLM</span></summary>
+        <div class="more"><p>Tennr, PackageX, Owl.co and horizontal doc-AI vendors. Reference cases, not prospects.</p></div>
+      </details>
+    </div>
+  </div>
+  <p class="note">Inside every play one split changes the message: already extracting → "replace your OCR + LLM stack"; not yet → "build it right the first time".</p>
+</section>
+
+<!-- ================= PHASE 6 ================= -->
+<section class="phase" aria-labelledby="p6">
+  <div class="phead"><span class="num">06</span><span class="pname" id="p6">Scale it to the whole market</span><span class="tag">A6</span><span class="cost">0 credits</span></div>
+  <div class="node main"><div class="sum"><span class="t">From 100 to every company that fits</span><span class="m">Answered from saved search sizes, no new spend</span></div></div>
+  <div class="row">
+    <div class="col">
+      <details class="node"><summary><span class="t">Market size</span><span class="m">~2,300 tight matches · ~1,000 pulled</span></summary>
+        <div class="more"><ul>
+          <li>Funnel: 1,000 → 349 (35%) → 100 (10%).</li>
+          <li>Inference: the other ~1,300 hold another 100–130 top-grade accounts.</li>
+          <li>Loose universe ~12,000 at ~30% fit → low thousands of real fits.</li>
+        </ul><span class="src">01-Onboarding-GTM/Segments-and-Market/a5-a6.md</span></div>
+      </details>
+    </div>
+    <div class="col">
+      <details class="node"><summary><span class="t">Unit cost</span><span class="m">~19 credits per top-100 account</span></summary>
+        <div class="more"><ul>
+          <li>Batch 2 alone: ~16 per top-100 account.</li>
+          <li>Next ~1,300 matches ≈ 2,600 credits: above our remaining working cap, so not run.</li>
+          <li>Full loose universe ≈ 20,000+ credits (inference). Needs OneGTM's budget and $ per credit.</li>
+        </ul></div>
+      </details>
+    </div>
+    <div class="col">
+      <details class="node"><summary><span class="t">9 things that break</span><span class="m">All of them happened to us</span></summary>
+        <div class="more"><ul>
+          <li>Keyword splitting · filter changes restart pages · docs wrong on cost · shared pool</li>
+          <li>Fake evidence · search labels ≠ what they do · unreadable sites / LLM drift</li>
+          <li>Stale signals · best segments run dry → grow by geography and hiring</li>
+        </ul></div>
+      </details>
+    </div>
+    <div class="col">
+      <details class="node gate"><summary><span class="t">Side quest: GitHub</span><span class="m">Weak for this ICP, one real find</span></summary>
+        <div class="more"><ul>
+          <li>Stargazer lists are closed (404). Forks, issues and code search still work, free.</li>
+          <li>127 people around VLM Run's repos → 0 matches to our 349 (students, solo devs, platforms).</li>
+          <li><b>Zeitro (#91):</b> public code sends borrower PDFs and photos to OpenAI vision. The exact stack VLM Run replaces.</li>
+          <li>Competitor repos: recent stars recovered from the public events feed (353 stars, 329 people, 60 list a company). Not yet matched.</li>
+        </ul><span class="src">03-Outreach/Side-Quests/github-signal.md</span></div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<div class="part" role="separator"><span>Part B · Turn it into outreach<small>B1–B5: signals, people, copy, personalization, the system</small></span></div>
+
+<!-- ================= PHASE 7 ================= -->
+<section class="phase" aria-labelledby="p7">
+  <div class="phead"><span class="num">07</span><span class="pname" id="p7">Turn the list into outreach</span><span class="tag">B1</span><span class="tag">B2</span><span class="tag">B3</span><span class="tag">B4</span><span class="cost">0 credits</span></div>
+  <div class="node main"><div class="sum"><span class="t">Right moment · right people · emails an engineer answers</span><span class="m">Designed, not sent. Nobody contacted.</span></div></div>
+  <div class="row">
+    <div class="col">
+      <details class="node"><summary><span class="t">B1 · Signals</span><span class="m">9 company · 5 people signals</span></summary>
+        <div class="more"><ul>
+          <li><b>Company:</b> ML/doc-AI hiring, job post naming Textract/Tesseract, new intake product page, compliance page, funding, marketplace listing, public LLM-vision code, repo activity, VLM Run signup.</li>
+          <li><b>People:</b> new CTO/Head of AI (90 days), customer champion moved, OCR-pain post, event speaker, engaged with VLM Run posts.</li>
+          <li>Strong signal on a top-100 account → signal email within 48h. One signal email per account per 30 days.</li>
+        </ul></div>
+      </details>
+    </div>
+    <div class="col">
+      <details class="node"><summary><span class="t">B2 · People</span><span class="m">30 DM · 40 influencer · 40 champion titles</span></summary>
+        <div class="more"><ul>
+          <li>Blitz people search → Blitz waterfall ranks decision maker &gt; influencer &gt; champion.</li>
+          <li>Email-finder waterfall → MillionVerifier: valid → <code>sendable.csv</code>.</li>
+          <li>Catch-alls → BounceBan → deliverable joins the same file. Rest → LinkedIn only.</li>
+        </ul><span class="src">03-Outreach/Signals-People-Copy/b2-titles.md</span></div>
+      </details>
+    </div>
+    <div class="col">
+      <details class="node"><summary><span class="t">B3 · Copy</span><span class="m">3 emails + signal version per play</span></summary>
+        <div class="more"><ul>
+          <li>25–55 words, one fact each, CTA offers to run their samples and send the JSON.</li>
+          <li>All 12 emails pass the house spam scan.</li>
+          <li><b>LinkedIn:</b> lowest-scored accounts first. Founder + growth account connect the same day, then 30–60 days of silence while weekly posts warm them up. Only the employee account messages.</li>
+        </ul></div>
+      </details>
+    </div>
+    <div class="col">
+      <details class="node"><summary><span class="t">B4 · Personalization</span><span class="m">5 real examples, sources shown</span></summary>
+        <div class="more"><ul>
+          <li>Inflooens: Claude Sonnet 4 for PDFs, GPT-4o-mini for images.</li>
+          <li>Coral: e-fax extraction + hiring ML engineers.</li>
+          <li>Zeitro: borrower phone photos → 1003.</li>
+          <li>Alvys: drivers snap BOL/POD photos.</li>
+          <li>Blitzz: OCR during live video sessions.</li>
+          <li>At 1,000: the same website read writes the line from a verbatim quote. No quote → segment fallback.</li>
+        </ul><span class="src">03-Outreach/Signals-People-Copy/b1-b4.md</span></div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PHASE 8 ================= -->
+<section class="phase" aria-labelledby="p8">
+  <div class="phead"><span class="num">08</span><span class="pname" id="p8">The system: what runs when</span><span class="tag">B5</span></div>
+  <div class="node main"><div class="sum"><span class="t">The same pipeline, running on its own</span><span class="m">Each layer feeds the next; signals decide timing, not targeting</span></div></div>
+  <div class="stem"></div>
+  <div class="sys" role="table" aria-label="Operating system: layers, what happens, cadence">
+    <div class="h" role="columnheader">Layer</div><div class="h" role="columnheader">What happens</div><div class="h" role="columnheader">Runs when</div>
+    <div class="k">Sources</div><div>Blitz company search (tight + lookalike recipes), new geographies, marketplaces, hiring search</div><div class="w">Quarterly · after each recipe change: size first</div>
+    <div class="k">Enrichment</div><div>Free website read + public ATS → visual core, modalities, flags, verbatim quote. Paid headcount on survivors only</div><div class="w">On every new company · monthly refresh, top 300</div>
+    <div class="k">Scoring</div><div><code>score.py</code>: 100 points, evidence only. Canary: the 4 real customers must stay near the top</div><div class="w">After every enrichment run</div>
+    <div class="k">Segments</div><div>Play A regulated docs · B field &amp; freight · C video-first · leave-out group</div><div class="w">Set by score run</div>
+    <div class="k">Signals</div><div>Hiring + named-tool job posts, site diffs, new leaders, funding, VLM Run signups</div><div class="w">Daily signups · weekly jobs · monthly sites &amp; people</div>
+    <div class="k">People</div><div>Title lists → Blitz search → waterfall → email finders → MillionVerifier → BounceBan → <code>sendable.csv</code></div><div class="w">When an account enters a play · monthly re-check</div>
+    <div class="k">Copy</div><div>Play sequence, or the signal version when one fired · line written from the site quote</div><div class="w">Per contact, at enrolment</div>
+    <div class="k">Sending</div><div>Email: 3 steps, days 0 · 3 · 9. LinkedIn: two accounts connect, message after 30–60 days</div><div class="w">Signal emails within 48h · approval gate before any send</div>
+  </div>
+  <p class="note">Loop: replies and bounces feed back into scoring; accounts with no contact found go to next month's re-check.</p>
+</section>
+
+<div class="part" role="separator"><span>Budget</span></div>
+
+<!-- ================= CREDITS ================= -->
+<section class="phase" aria-labelledby="pc">
+  <div class="phead"><span class="num">Σ</span><span class="pname" id="pc">Where the credits went</span></div>
+  <div class="credits" role="list">
+    <div role="listitem"><b>1</b><span>00 setup</span></div>
+    <div role="listitem"><b>269</b><span>01 recipes</span></div>
+    <div role="listitem"><b>656</b><span>02 pull</span></div>
+    <div role="listitem"><b>169</b><span>03 enrich</span></div>
+    <div role="listitem"><b>64</b><span>04 score</span></div>
+    <div role="listitem"><b>762</b><span>05 batch 2</span></div>
+    <div role="listitem"><b>1,921</b><span>of 10,000 · 6,000 reserve untouched</span></div>
+  </div>
+  <p class="note">Phases 6–8 used no credits. Lost to mistakes: 50 ("as-built") + 2 (wrong Peak Health domain).</p>
+</section>
+
+<footer>
+  <span>Sources: Workspace/data/credit_log.csv · companies_scored.csv · notes in 01–04 folders</span>
+  <span>VLM Run × OneGTM · case study diagram (B5)</span>
+</footer>
+</main>
+</section>
+
+<!-- ================= WRITE-UP VIEW ================= -->
+<section class="view" id="view-writeup" aria-labelledby="wu-title" hidden>
+<main class="wrap doc">
+  <a class="back" href="#flow">← Back to the flowchart</a>
+  <div class="eyebrow">Write-up · Part A + Part B</div>
+  <h1 id="wu-title">VLM Run GTM build: the write-up</h1>
+  <p class="lede">A1–A6 and B1–B4 in a few lines each. The flowchart is B5.</p>
+
+  <nav class="toc" aria-label="Sections">
+    <a href="#wu-a1">A1 Find</a><a href="#wu-a2">A2 Enrich</a><a href="#wu-a3">A3 Score</a><a href="#wu-a4">A4 The hundred</a><a href="#wu-a5">A5 Segments</a><a href="#wu-a6">A6 Scale</a>
+    <a href="#wu-b1">B1 Signals</a><a href="#wu-b2">B2 People</a><a href="#wu-b3">B3 Copy</a><a href="#wu-b4">B4 Personalization</a>
+  </nav>
+
+  <h2 class="part-h">Part A · The list</h2>
+
+  <h3 id="wu-a1"><span class="sec">A1</span>Find</h3>
+  <ul>
+    <li>Started from VLM Run's 4 real customers: small vertical software companies whose product eats messy paperwork.</li>
+    <li>6 Blitz search recipes, tightened from v1 to v4 by hand-checking samples. Software-only industries and a competitor blocklist did most of the cleanup.</li>
+    <li>Batch 2: lookalikes of our top scorers plus 6 more countries, which raised the #100 score from 42 to 59.</li>
+  </ul>
+
+  <h3 id="wu-a2"><span class="sec">A2</span>Enrich</h3>
+  <ul>
+    <li>Free first: 565 → 232 (Blitz about text) → 194 (their own website).</li>
+    <li>Kept for each company: visual core, docs / images / video, a word-for-word quote + URL, and regulated-data and deployment flags.</li>
+    <li>Paid last, survivors only: ML/AI hiring and engineering headcount.</li>
+  </ul>
+
+  <h3 id="wu-a3"><span class="sec">A3</span>Score</h3>
+  <ul>
+    <li>100 points, evidence only. <b>70 for the need</b> (visual core, messy input, video, extracting today) and <b>30 for the buyer</b> (sensitive data, hiring now, right size).</li>
+    <li>Minus points for building their own vision models, being a services firm, or being acquired.</li>
+    <li>Checked three ways: real customers land #14, #17 and #26 · moving any weight ±20% keeps 93+ of the top 100 · 10 rows checked by hand → 4 rule fixes.</li>
+  </ul>
+
+  <h3 id="wu-a4"><span class="sec">A4</span>The hundred</h3>
+  <ul>
+    <li>#1 Avallon AI 85 → #100 TrialView 59. 97 of 100 score 60+.</li>
+    <li>Every row: scores, play, who to contact, a verified quote. In the Sheet, tab <b>Top 100</b>.</li>
+  </ul>
+
+  <h3 id="wu-a5"><span class="sec">A5</span>Segments</h3>
+  <ul>
+    <li><b>A · Regulated doc intake (59):</b> lead with accuracy plus zero retention, BAA and VPC.</li>
+    <li><b>B · Field &amp; freight (28):</b> lead with docs and photos in one API.</li>
+    <li><b>C · Video-first (13):</b> lead with video into JSON.</li>
+    <li>Leave out competitors and companies that built their own VLM.</li>
+  </ul>
+
+  <h3 id="wu-a6"><span class="sec">A6</span>Scale</h3>
+  <ul>
+    <li>~2,300 companies match our tight searches, and we pulled ~1,000. About 1 in 10 makes the top grade.</li>
+    <li>~19 credits per top-100 account. Covering the rest costs ≈2,600 credits, so we stopped under our cap.</li>
+    <li>What breaks: keyword splits, docs wrong on cost, fake evidence, stale signals.</li>
+  </ul>
+
+  <h2 class="part-h">Part B · The outreach</h2>
+
+  <h3 id="wu-b1"><span class="sec">B1</span>Signals</h3>
+  <ul>
+    <li><b>Company:</b> hiring ML/doc-AI engineers, job posts naming Textract or Tesseract, a new intake product page, VLM Run signups.</li>
+    <li><b>People:</b> a new CTO or Head of AI, a customer champion who moved, someone posting about OCR pain.</li>
+    <li>A strong signal sends the signal email within 48h. Signals change timing, not targeting.</li>
+  </ul>
+
+  <h3 id="wu-b2"><span class="sec">B2</span>People</h3>
+  <ul>
+    <li>30 / 40 / 40 titles → Blitz people search → waterfall (decision maker &gt; influencer &gt; champion) → email finders → MillionVerifier → BounceBan for catch-alls → one <code>sendable.csv</code>.</li>
+    <li>No email found → LinkedIn only.</li>
+  </ul>
+
+  <h3 id="wu-b3"><span class="sec">B3</span>Copy</h3>
+  <ul>
+    <li>3 emails + a signal version per play. 25–55 words, one fact, an offer to run their samples. <a href="#emails">See the emails →</a></li>
+    <li><b>LinkedIn:</b> founder and growth accounts connect the same day, then wait 30–60 days before one message. Lowest-scored accounts go first.</li>
+  </ul>
+
+  <h3 id="wu-b4"><span class="sec">B4</span>Personalization</h3>
+  <ul>
+    <li>One line from their own site, rewritten from the saved quote. No quote → segment fallback. Works the same for 1,000 companies.</li>
+    <li><b>Examples:</b> Inflooens (Claude + GPT-4o-mini for documents) · Coral (e-fax extraction, hiring ML) · Zeitro (phone photos of pay stubs) · Alvys (driver BOL photos) · Blitzz (OCR in live video).</li>
+  </ul>
+
+  <p class="wu-end"><b>1,921 of 10,000 credits spent. Nobody contacted.</b> Full detail sits behind each box in the flowchart.</p>
+  <a class="back" href="#flow">← Back to the flowchart</a>
+</main>
+</section>
+
+<!-- ================= EMAIL VIEW ================= -->
+<section class="view" id="view-emails" aria-labelledby="em-title" hidden>
+<main class="wrap mailwrap">
+  <a class="back" href="#flow">← Back to the flowchart</a>
+  <div class="eyebrow">B3 · Email copy</div>
+  <h1 id="em-title">The email copy, by play</h1>
+  <p class="lede">Three plays, three emails each, plus the version that goes out when a signal fires. <mark class="var">Highlighted</mark> words are filled in per company. <mark class="fill">Green</mark> shows a real fill from our data.</p>
+
+  <div class="rules">
+    <div><b>25–55</b><span>words per email</span></div>
+    <div><b>1</b><span>fact per email</span></div>
+    <div><b>0</b><span>meeting asks: we offer to run their samples</span></div>
+    <div><b>12 / 12</b><span>pass the house spam scan</span></div>
+  </div>
+
+  <div class="cadence" aria-label="Sequence timing">
+    <div><b>Day 0</b><span>Email 1 · fresh send</span></div>
+    <div><b>Day 3</b><span>Email 2 · reply in thread</span></div>
+    <div><b>Day 9</b><span>Email 3 · fresh send, new subject</span></div>
+    <div class="sig"><b>Any day</b><span>Signal version replaces Email 1</span></div>
+  </div>
+
+  <nav class="playnav" aria-label="Plays">
+    <a href="#em-a">A · Regulated doc intake</a><a href="#em-b">B · Field &amp; freight</a><a href="#em-c">C · Video-first</a><a href="#em-li">LinkedIn</a>
+  </nav>
+
+  <!-- PLAY A -->
+  <section class="play" id="em-a">
+    <div class="playhead"><span class="pl">Play A</span><h2>Regulated document intake</h2></div>
+    <p class="who"><b>Who:</b> health, insurance, lending and legal-records software (59 of the top 100) · e.g. Coral, Avallon AI, Inflooens · <b>Proof:</b> Valerie Health, Scan.com</p>
+    <div class="mails">
+      <article class="mail"><header><span class="step">Email 1</span><span>Day 0 · fresh send</span><span class="wc">48 words</span></header>
+        <div class="subj">Subject <code>{company} fax intake</code> <code>{first_name} intake pipeline</code> <code>{company} document extraction</code></div>
+        <div class="body">{FIRST_NAME},
+
+{OWN_FACT}, which is where OCR plus an LLM usually breaks on {HARD_PART}.
+
+Valerie Health replaced that setup with VLM Run and went live in under two weeks. Zero data retention and a BAA are both available.
+
+Want me to run 10 redacted samples and send back the JSON?</div>
+        <div class="filled"><span class="fl">Filled for Coral</span>Sam,
+
+<mark class="fill">Coral pulls clinical data from e-faxes</mark>, which is where OCR plus an LLM usually breaks on <mark class="fill">handwriting and checkboxes</mark>. …</div>
+      </article>
+      <article class="mail"><header><span class="step">Email 2</span><span>Day 3 · same thread</span><span class="wc">33 words</span></header>
+        <div class="body">{FIRST_NAME}, a proof point from your world.
+
+Scan.com gets imaging referrals with hand-ticked boxes, and VLM Run reads them at over 98% accuracy.
+
+I can send the short writeup on how they tested it.</div>
+      </article>
+      <article class="mail"><header><span class="step">Email 3</span><span>Day 9 · fresh send</span><span class="wc">52 words</span></header>
+        <div class="subj">Subject <code>{company} phi in your vpc</code></div>
+        <div class="body">{FIRST_NAME},
+
+{COMPANY} handles patient records, so any extraction model has to clear a security review before it ships.
+
+VLM Run can run inside your own VPC, so files stay in your cloud, and one API covers PDFs, phone photos and video.
+
+Should I send the deployment one-pager your security team would ask for?</div>
+        <p class="tip">Lending: "borrower PII". Insurance: "policyholder files". The one-pager needs VLM Run to confirm it exists.</p>
+      </article>
+      <article class="mail signal"><header><span class="step">Signal version</span><span>Fires on ML hiring · real case: Coral</span><span class="wc">49 words</span></header>
+        <div class="body">{FIRST_NAME},
+
+<mark class="fill">Coral is hiring a Senior ML Engineer</mark>, and your site says the core work is <mark class="fill">clinical data extraction from e-faxes</mark>.
+
+Before that hire spends months on OCR plumbing, it may be worth testing VLM Run on 10 redacted faxes. Want me to run them and send back the JSON?</div>
+      </article>
+    </div>
+  </section>
+
+  <!-- PLAY B -->
+  <section class="play" id="em-b">
+    <div class="playhead"><span class="pl">Play B</span><h2>Field &amp; freight paperwork + photos</h2></div>
+    <p class="who"><b>Who:</b> logistics, construction and property software (28 of the top 100) · e.g. Alvys, KlearNow, Fieldwire · <b>Proof:</b> CivilGrid</p>
+    <div class="mails">
+      <article class="mail"><header><span class="step">Email 1</span><span>Day 0 · fresh send</span><span class="wc">39 words</span></header>
+        <div class="subj">Subject <code>{company} bol photos</code> <code>{first_name} driver paperwork</code> <code>{company} field documents</code></div>
+        <div class="body">{FIRST_NAME},
+
+{OWN_FACT}. Turning those photos into clean fields is where OCR trips on stamps, signatures and handwriting.
+
+VLM Run reads documents and photos through one API.
+
+Want me to run 10 of your messiest photos and send back the JSON?</div>
+        <div class="filled"><span class="fl">Filled for Alvys</span>Sam,
+
+<mark class="fill">Alvys drivers already snap photos of BOLs and PODs in the app</mark>. Turning those photos into clean fields is where OCR trips on stamps, signatures and handwriting. …</div>
+      </article>
+      <article class="mail"><header><span class="step">Email 2</span><span>Day 3 · same thread</span><span class="wc">32 words</span></header>
+        <div class="body">{FIRST_NAME}, one comparable team.
+
+CivilGrid, a construction data platform, uses VLM Run on its site paperwork. Same idea as yours, different documents.
+
+Happy to share what they feed it and what comes out.</div>
+        <p class="tip">The CivilGrid detail needs VLM Run to confirm.</p>
+      </article>
+      <article class="mail"><header><span class="step">Email 3</span><span>Day 9 · fresh send</span><span class="wc">49 words</span></header>
+        <div class="subj">Subject <code>{company} load documents</code></div>
+        <div class="body">{FIRST_NAME},
+
+At {COMPANY}'s volume, every misread delivery receipt becomes a person fixing it by hand.
+
+VLM Run returns typed JSON against a schema you define, so a bad read fails validation instead of slipping through to your customer.
+
+Should I send a sample output from a real bill of lading?</div>
+      </article>
+      <article class="mail signal"><header><span class="step">Signal version</span><span>Fires on AI hiring · real case: KlearNow.AI</span><span class="wc">47 words</span></header>
+        <div class="body">{FIRST_NAME},
+
+<mark class="fill">KlearNow is hiring a senior AI engineer</mark>, and <mark class="fill">customs paperwork</mark> is the input that hire will spend most of their time on.
+
+VLM Run already reads commercial invoices, packing lists and scanned forms into JSON. Want me to run 10 of yours before the role is filled?</div>
+      </article>
+    </div>
+  </section>
+
+  <!-- PLAY C -->
+  <section class="play" id="em-c">
+    <div class="playhead"><span class="pl">Play C</span><h2>Video-first</h2></div>
+    <p class="who"><b>Who:</b> dash-cam and remote-video-inspection software (13 of the top 100) · e.g. VisionTrack, Tenna, Blitzz · <b>Proof:</b> Voxel51 plugin (no customer yet)</p>
+    <div class="mails">
+      <article class="mail"><header><span class="step">Email 1</span><span>Day 0 · fresh send</span><span class="wc">46 words</span></header>
+        <div class="subj">Subject <code>{company} dash cam footage</code> <code>{first_name} video review</code> <code>{company} footage search</code></div>
+        <div class="body">{FIRST_NAME},
+
+{OWN_FACT}. Finding the 30 seconds that matter usually means someone scrubbing footage or a model trained per event type.
+
+VLM Run turns video into structured JSON you can search, through one API.
+
+Want me to run five of your clips and send back what it finds?</div>
+        <div class="filled"><span class="fl">Filled for VisionTrack</span>Sam,
+
+<mark class="fill">VisionTrack says manual review of video footage doesn't scale</mark>. Finding the 30 seconds that matter usually means someone scrubbing footage … </div>
+      </article>
+      <article class="mail"><header><span class="step">Email 2</span><span>Day 3 · same thread</span><span class="wc">28 words</span></header>
+        <div class="body">{FIRST_NAME}, if your team already uses FiftyOne, there's a VLM Run plugin for Voxel51.
+
+That means you can test it on your own footage without writing glue code first.</div>
+      </article>
+      <article class="mail"><header><span class="step">Email 3</span><span>Day 9 · fresh send</span><span class="wc">47 words</span></header>
+        <div class="subj">Subject <code>{company} event summaries</code></div>
+        <div class="body">{FIRST_NAME},
+
+{COMPANY}'s customers want an answer, not a clip. What happened, when, and who was at fault.
+
+VLM Run reads the video and the paperwork around it, like FNOL forms and driver logs, through the same API.
+
+Should I send a sample output from a public dash-cam clip?</div>
+      </article>
+      <article class="mail signal"><header><span class="step">Signal version</span><span>Fires on a new ML leader · illustrative</span><span class="wc">46 words</span></header>
+        <div class="body">{FIRST_NAME},
+
+You joined {COMPANY} to lead ML this {MONTH}, which usually means picking the video stack for the next year.
+
+VLM Run turns raw footage into structured JSON through one API, so there's no per-event model to train first. Want me to run five of your clips?</div>
+        <p class="tip">No video account in our data showed a live signal, so this one is a template.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- LINKEDIN -->
+  <section class="play" id="em-li">
+    <div class="playhead"><span class="pl">LinkedIn</span><h2>Same people, slower</h2></div>
+    <p class="who">Lowest-scored accounts first, top accounts last. Two VLM Run accounts, no pitch on accept.</p>
+    <div class="li">
+      <div><b>Day 0</b><span>Founder + growth account both send a connection request. No note, or a short one with no pitch.</span></div>
+      <div><b>Days 1–60</b><span>Silence. Weekly founder and company posts warm them up. A like or comment moves them forward early.</span></div>
+      <div><b>Day 30–60</b><span>The employee account sends one message with the same offer as the emails.</span></div>
+      <div><b>+7 days</b><span>One proof point (Scan.com, CivilGrid or the Voxel51 plugin). Then stop.</span></div>
+    </div>
+    <article class="mail"><header><span class="step">Connection note</span><span>Optional · under 200 characters</span></header>
+      <div class="body">Hi {FIRST_NAME}, I work with teams pulling data out of faxes and intake forms. Would be good to connect.</div>
+      <p class="tip">Play B: "turning driver and jobsite photos into data". Play C: "that need answers out of fleet video".</p>
+    </article>
+    <article class="mail"><header><span class="step">First message</span><span>Day 30–60 · employee account</span></header>
+      <div class="body">If it's useful, I can run 10 of your sample documents (or five clips) through VLM Run and send you the output. No call needed.</div>
+    </article>
+  </section>
+
+  <p class="foot">Every email ends with: Best, {SENDER_FIRST_NAME}, VLM Run. "Sam" is a placeholder name. Source: <code>03-Outreach/Signals-People-Copy/b1-b4.md</code>.</p>
+  <a class="back" href="#flow">← Back to the flowchart</a>
+</main>
+</section>
+
+<script>
+  (function(){
+    // highlight template variables
+    document.querySelectorAll('#view-emails .body, #view-emails .subj code').forEach(function(el){
+      el.innerHTML=el.innerHTML.replace(/\{[A-Za-z_]+\}/g,function(m){return '<mark class="var">'+m+'</mark>'});
+    });
+    // simple in-page routing: #flow / #writeup / #emails (plus anchors inside a view)
+    var views={flow:'view-flow',writeup:'view-writeup',emails:'view-emails'};
+    function route(){
+      var h=(location.hash||'#flow').slice(1), v=views[h]?h:null, target=null;
+      if(!v){ target=document.getElementById(h); var host=target&&target.closest('.view'); v=host?host.id.replace('view-',''):'flow'; }
+      Object.keys(views).forEach(function(k){document.getElementById(views[k]).hidden=(k!==v)});
+      document.getElementById('rail-wu').setAttribute('aria-current',v==='writeup'?'page':'false');
+      document.getElementById('rail-em').setAttribute('aria-current',v==='emails'?'page':'false');
+      document.querySelectorAll('.topnav a').forEach(function(a){a.setAttribute('aria-current',a.dataset.v===v?'page':'false')});
+      document.title={flow:'VLM Run GTM Build',writeup:'VLM Run Write-up',emails:'VLM Run Email Copy'}[v];
+      if(target){target.scrollIntoView()} else {window.scrollTo(0,0)}
+    }
+    window.addEventListener('hashchange',route); route();
+    document.querySelectorAll('.row').forEach(function(r){
+      var nx=r.nextElementSibling;
+      if(!nx||!nx.classList.contains('stem')||r.children.length<2) return;
+      r.classList.add('merge');
+      Array.prototype.forEach.call(r.children,function(c){var d=document.createElement('div');d.className='tail';c.appendChild(d)});
+      var m=document.createElement('div');m.className='mergeline';m.style.setProperty('--n',r.children.length);
+      r.parentNode.insertBefore(m,nx);
+    });
+    var btn=document.getElementById('toggle');
+    btn.addEventListener('click',function(){
+      var open=btn.getAttribute('aria-pressed')!=='true';
+      document.querySelectorAll('details').forEach(function(d){d.open=open});
+      btn.setAttribute('aria-pressed',open);
+      btn.textContent=open?'Collapse all':'Expand all';
+    });
+  })();
+</script>
+</body>
+</html>
