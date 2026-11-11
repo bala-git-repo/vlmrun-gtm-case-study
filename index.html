@@ -657,7 +657,7 @@
 
 <!-- ================= PHASE 7 ================= -->
 <section class="phase band" style="--c:#fcf3d8" aria-labelledby="p7">
-  <div class="phead"><span class="num">07</span><span class="pname" id="p7">Turn the list into outreach</span><span class="tag">B1</span><span class="tag">B2</span><span class="tag">B3</span><span class="tag">B4</span><span class="cost">0 credits</span></div>
+  <div class="phead"><span class="num">07</span><span class="pname" id="p7">Turn the list into outreach</span><span class="tag">B1</span><span class="tag">B2</span><span class="tag">B3</span><span class="tag">B4</span><span class="cost">104 Crustdata credits</span></div>
   <div class="node main"><div class="sum"><span class="t">Right moment · right people · emails an engineer answers</span><span class="m">Designed, not sent. Nobody contacted.</span></div></div>
   <div class="row">
     <div class="col">
@@ -700,6 +700,24 @@
       </details>
     </div>
   </div>
+  <div class="stem arrow"></div>
+  <details class="node result" style="max-width:640px;margin:0 auto"><summary><span class="t" style="text-align:center">Signals checked live on the top 100 (Crustdata)</span><span class="m" style="text-align:center">31 of 100 have a timing signal right now · 104 credits</span></summary>
+    <div class="more"><table class="mini">
+      <tr><th>What we pulled</th><th>Companies</th></tr>
+      <tr><td>Headcount growth + last funding</td><td class="n">98</td></tr>
+      <tr><td>Job posts naming OCR / Textract / document AI / computer vision (95 posts)</td><td class="n">27 (10 strong)</td></tr>
+      <tr><td>Tech decision makers, names + LinkedIn only (150 people)</td><td class="n">64</td></tr>
+      <tr><td>Decision maker new in role in the last 90 days</td><td class="n">2</td></tr>
+      <tr><td>Recent LinkedIn post about document pain</td><td class="n">10</td></tr>
+    </table>
+    <ul>
+      <li><b>TRUE (#61):</b> posted "Should we build or buy AI?" on 26 Aug, then raised on 7 Oct.</li>
+      <li><b>Coral (#2):</b> ML job posts name Tesseract and AWS Textract, but a post says they built their own OCR stack. Real build-vs-buy risk.</li>
+      <li><b>Outmarket (#17), Wyre AI (#41):</b> fresh rounds, team up 40–50%, hiring for document AI.</li>
+      <li><b>Transflo (#47), Informed.IQ (#15):</b> new SVP of AI since 1 Sep.</li>
+      <li>Lost 2.85 credits to a filter that returned empty rows; re-ran it.</li>
+    </ul><span class="src">Sheet tab "Crustdata enrichment" · 03-Outreach/Signals-People-Copy/crustdata-signals.md</span></div>
+  </details>
 </section>
 
 <!-- ================= PHASE 8 ================= -->
@@ -713,7 +731,7 @@
     <div class="k">Enrichment</div><div>Free website read + public ATS → visual core, modalities, flags, verbatim quote. Paid headcount on survivors only</div><div class="w">On every new company · monthly refresh, top 300</div>
     <div class="k">Scoring</div><div><code>score.py</code>: 100 points, evidence only. Canary: the 4 real customers must stay near the top</div><div class="w">After every enrichment run</div>
     <div class="k">Segments</div><div>Play A regulated docs · B field &amp; freight · C video-first · leave-out group</div><div class="w">Set by score run</div>
-    <div class="k">Signals</div><div>Hiring + named-tool job posts, site diffs, new leaders, funding, VLM Run signups</div><div class="w">Daily signups · weekly jobs · monthly sites &amp; people</div>
+    <div class="k">Signals</div><div>Hiring + named-tool job posts, headcount growth, funding, new leaders, document-pain posts (Crustdata), site diffs, VLM Run signups</div><div class="w">Daily signups · weekly jobs · monthly sites &amp; people</div>
     <div class="k">People</div><div>Title lists → Blitz search → waterfall → email finders → MillionVerifier → BounceBan → <code>sendable.csv</code></div><div class="w">When an account enters a play · monthly re-check</div>
     <div class="k">Copy</div><div>Play sequence, or the signal version when one fired · line written from the site quote</div><div class="w">Per contact, at enrolment</div>
     <div class="k">Sending</div><div>Email: 3 steps, days 0 · 3 · 9. LinkedIn: two accounts connect, message after 30–60 days</div><div class="w">Signal emails within 48h · approval gate before any send</div>
@@ -735,7 +753,8 @@
     <div role="listitem"><b>762</b><span>05 batch 2</span></div>
     <div role="listitem"><b>1,921</b><span>of 10,000 · 6,000 reserve untouched</span></div>
   </div>
-  <p class="note">Phases 6–8 used no credits. Lost to mistakes: 50 ("as-built") + 2 (wrong Peak Health domain).</p>
+  <p class="note">Phases 6–8 used no Blitz credits. Lost to mistakes: 50 ("as-built") + 2 (wrong Peak Health domain).</p>
+  <p class="note">Crustdata (separate account): 104 of 199 credits on top-100 signals in Phase 07, under a 120 cap. 2.85 lost to a bad filter.</p>
 </section>
 
 <footer>
@@ -809,12 +828,14 @@
     <li><b>Company:</b> hiring ML/doc-AI engineers, job posts naming Textract or Tesseract, a new intake product page, VLM Run signups.</li>
     <li><b>People:</b> a new CTO or Head of AI, a customer champion who moved, someone posting about OCR pain.</li>
     <li>A strong signal sends the signal email within 48h. Signals change timing, not targeting.</li>
+    <li><b>Checked live with Crustdata:</b> 31 of the top 100 have a signal now. 10 are hiring engineers for OCR or document extraction, 2 have a new AI leader, and TRUE posted "Should we build or buy AI?" in August. Full table in the sheet tab <b>Crustdata enrichment</b>.</li>
   </ul>
 
   <h3 id="wu-b2"><span class="sec">B2</span>People</h3>
   <ul>
     <li>30 / 40 / 40 titles → Blitz people search → waterfall (decision maker &gt; influencer &gt; champion) → email finders → MillionVerifier → BounceBan for catch-alls → one <code>sendable.csv</code>.</li>
     <li>No email found → LinkedIn only.</li>
+    <li><b>Tested on the top 100:</b> Crustdata found tech decision makers at 64 of 100 (150 people, names and LinkedIn only, nobody contacted).</li>
   </ul>
 
   <h3 id="wu-b3"><span class="sec">B3</span>Copy</h3>
@@ -829,7 +850,7 @@
     <li><b>Examples:</b> Inflooens (Claude + GPT-4o-mini for documents) · Coral (e-fax extraction, hiring ML) · Zeitro (phone photos of pay stubs) · Alvys (driver BOL photos) · Blitzz (OCR in live video).</li>
   </ul>
 
-  <p class="wu-end"><b>1,921 of 10,000 credits spent. Nobody contacted.</b> Full detail sits behind each box in the flowchart.</p>
+  <p class="wu-end"><b>1,921 of 10,000 Blitz credits and 104 of 199 Crustdata credits spent. Nobody contacted.</b> Full detail sits behind each box in the flowchart.</p>
   <a class="back" href="#flow">← Back to the flowchart</a>
 </main>
 </section>
