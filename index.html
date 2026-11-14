@@ -107,6 +107,20 @@
   .note{max-width:720px;margin:12px auto 0;text-align:center;font-size:13px;color:var(--mute)}
 
   .node > pre.tree{border-top:1px solid var(--line)}
+  a.drive{display:block;margin:0 14px 14px;padding:12px 14px;background:var(--hl,#ffe680);border:2px solid #000;color:#000;text-decoration:none;text-align:center}
+  a.drive b{display:block;font-size:15px}
+  a.drive span{display:block;font-size:12.5px;margin-top:3px}
+  a.drive:hover{background:#000;color:#fff}
+  a.drive:focus-visible{outline:3px solid #000;outline-offset:3px}
+  table.score{border-collapse:collapse;width:100%;max-width:860px;margin:0 auto;background:#fff;font-size:13.5px}
+  table.score th,table.score td{border:1px solid #000;padding:8px 10px;text-align:left;vertical-align:top}
+  table.score th{background:#000;color:#fff;font:600 12px/1.3 var(--mono);letter-spacing:.06em;text-transform:uppercase}
+  table.score td.pts{font:700 15px/1.2 var(--mono);text-align:center;white-space:nowrap}
+  table.score tr.grp td{background:#f2f2f2;font:700 11.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase}
+  table.score tr.tot td{font-weight:700;border-top:2px solid #000}
+  table.score tr.flag td{background:#fff7d1}
+  .scorewrap{overflow-x:auto;margin-top:var(--stub)}
+  @media (max-width:760px){ table.score{font-size:12.5px} table.score th,table.score td{padding:6px 7px} }
   pre.tree{margin:0;font:12.5px/1.55 var(--mono);white-space:pre;overflow-x:auto;padding:16px 18px}
   .tree b{font-weight:700}
 
@@ -247,12 +261,12 @@
 <!-- ================= HEADER ================= -->
 <div class="eyebrow">OneGTM case study · Client: VLM Run · Built by Bala · 11 Nov 2026</div>
 <h1>From one brief to a hundred accounts and the system that keeps finding them</h1>
-<p class="lede">Every phase of Part A (the list) and Part B (the outreach), in the order we did it. Each box is one step. Click a box with an <b>i</b> to see what happened, what it cost and what we changed. Every number comes from our own logs.</p>
+<p class="lede">Read top to bottom: Part A builds the list, Part B turns it into outreach. Each box says in one line what we did. Click a box with an <b>i</b> for the detail, the cost and what we fixed. Every number comes from our own logs.</p>
 
 <div class="stats" role="list">
   <div class="stat" role="listitem"><b>~1,000</b><span>companies pulled in two batches</span></div>
-  <div class="stat" role="listitem"><b>322</b><span>survived the website read and the competitor check</span></div>
-  <div class="stat" role="listitem"><b>100</b><span>scored 51+ on evidence only, no competitors</span></div>
+  <div class="stat" role="listitem"><b>311</b><span>had a readable website and don't sell extraction themselves</span></div>
+  <div class="stat" role="listitem"><b>100</b><span>scored 51 to 85 (out of 90) on evidence only</span></div>
   <div class="stat" role="listitem"><b>1,921</b><span>of 10,000 Blitz credits spent</span></div>
   <div class="stat" role="listitem"><b>0</b><span>people contacted</span></div>
 </div>
@@ -269,10 +283,10 @@
 <!-- ================= PHASE 0 ================= -->
 <section class="phase band" style="--c:#f1f1f1" aria-labelledby="p0">
   <div class="phead"><span class="num">00</span><span class="pname" id="p0">Setup: run it like a client</span><span class="cost">1 credit</span></div>
-  <div class="node main"><div class="sum"><span class="t">One folder, one runbook, one credit log</span><span class="m">Treated VLM Run like a real client account: documented, gated, reproducible</span></div></div>
+  <div class="node main"><div class="sum"><span class="t">We ran VLM Run like a real client account</span><span class="m">One folder, one runbook, one log of every credit spent</span></div></div>
   <div class="row">
     <div class="col">
-      <details class="node"><summary><span class="t">Read the Blitz docs</span><span class="m">Learn the cost model before spending</span></summary>
+      <details class="node"><summary><span class="t">We learned how Blitz charges before spending</span><span class="m">1 credit per record; empty results are free</span></summary>
         <div class="more"><ul>
           <li>1 credit = 1 record returned. Empty results are free.</li>
           <li><b>Sizing trick:</b> <code>max_results: 1</code> returns the total match count, so a whole segment is sized for 1 credit.</li>
@@ -281,7 +295,7 @@
       </details>
     </div>
     <div class="col">
-      <details class="node"><summary><span class="t">Credit guard in code</span><span class="m">4,000 working cap · 6,000 reserve</span></summary>
+      <details class="node"><summary><span class="t">Our code refuses to overspend</span><span class="m">4,000-credit working cap · 6,000 kept untouched</span></summary>
         <div class="more"><ul>
           <li><code>blitz.py</code> logs every call (endpoint, request, records, balance) to <code>credit_log.csv</code>.</li>
           <li>Refuses any pull over 500 records without explicit approval.</li>
@@ -290,7 +304,7 @@
       </details>
     </div>
     <div class="col">
-      <details class="node"><summary><span class="t">Questions to the client</span><span class="m">Asked early, because asking is free</span></summary>
+      <details class="node"><summary><span class="t">We asked the client questions on day one</span><span class="m">Asking is free; guessing costs credits</span></summary>
         <div class="more"><ul>
           <li>Missing Ray Summit / Part 2 file and the "two shared sections".</li>
           <li>Closed-won list beyond the logo wall.</li>
@@ -301,6 +315,7 @@
   </div>
   <div class="stem arrow"></div>
   <div class="node result" style="max-width:560px;margin:0 auto"><div class="sum"><span class="t" style="text-align:center">The folder, organised like a client account</span><span class="m" style="text-align:center">Brief → onboarding → list building → outreach → reports → deliverables</span></div>
+  <a class="drive" href="https://drive.google.com/drive/folders/10pzVhQFEmXOOJ325OtRD7N6U-svXFHzs" target="_blank" rel="noopener"><b>Open the whole folder on Google Drive →</b><span>Every note, script and data file below, view-only. The API key file is not included.</span></a>
   <pre class="tree">VLM Run Case Study/
 ├── <b>INDEX.md</b>                  what's where
 ├── <b>RUNBOOK.md</b>                plan · gates · log
@@ -319,7 +334,7 @@
 ├── 04-Reports/               credit ledger
 ├── 05-Deliverables/          this diagram, write-up
 └── Workspace/                code + data
-    ├── .env                  API key, never shared
+    ├── .env                  API key, never shared (not on Drive)
     ├── scripts/              blitz · merge · fetch
     │   │                     score · build_top100
     │   └── queries/          every recipe version
@@ -334,10 +349,10 @@
 <!-- ================= PHASE 1 ================= -->
 <section class="phase band" style="--c:#e8f0fb" aria-labelledby="p1">
   <div class="phead"><span class="num">01</span><span class="pname" id="p1">ICP + search recipes</span><span class="tag">A1</span><span class="cost">269 credits</span></div>
-  <div class="node main"><div class="sum"><span class="t">Who buys, and how do we find more of them?</span><span class="m">Start from the 4 real customers, not from guesses</span></div></div>
+  <div class="node main"><div class="sum"><span class="t">Who buys VLM Run, and where are more of them?</span><span class="m">We started from the 4 real customers, not from guesses</span></div></div>
   <div class="row">
     <div class="col">
-      <details class="node"><summary><span class="t">Study the real customers</span><span class="m">Valerie Health · Scan.com · Basata · CivilGrid</span></summary>
+      <details class="node"><summary><span class="t">We studied the 4 real customers</span><span class="m">Valerie Health, Scan.com, Basata, CivilGrid: small software companies drowning in paperwork</span></summary>
         <div class="more"><ul>
           <li>Looked each up in Blitz (15 credits).</li>
           <li><b>Pattern:</b> small vertical software companies (10–200 people) whose product eats messy paperwork. VLM Run sits inside their product.</li>
@@ -347,7 +362,7 @@
       </details>
     </div>
     <div class="col">
-      <details class="node"><summary><span class="t">7 segment hypotheses</span><span class="m">Health ops, construction, insurance, lending, logistics, robotics, video AI</span></summary>
+      <details class="node"><summary><span class="t">We guessed 7 markets to test</span><span class="m">Health, construction, insurance, lending, logistics, robotics, video</span></summary>
         <div class="more"><ul>
           <li>Ranked by evidence: healthcare ops = 3 of 4 customers (high). Construction = CivilGrid (medium). The rest = tests.</li>
           <li><b>Out:</b> doc-AI competitors, integration partners, services shops, &gt;1,000 employees, the hospitals/GCs themselves.</li>
@@ -355,7 +370,7 @@
       </details>
     </div>
     <div class="col">
-      <details class="node"><summary><span class="t">Recipes v1 → v4</span><span class="m">Size → sample 10–15 → hand-check → fix</span></summary>
+      <details class="node"><summary><span class="t">We rewrote each search 4 times</span><span class="m">Count the matches, read 10–15 by hand, fix the search, repeat</span></summary>
         <div class="more"><ul>
           <li>v1 loose searches matched ~12,000 companies, about 70% junk.</li>
           <li><b>Biggest fix:</b> software-only industries. Construction went from 0 good to 6 of 10.</li>
@@ -368,7 +383,7 @@
   <div class="stem"></div>
   <div class="row">
     <div class="col">
-      <details class="node"><summary><span class="t">Kept 6 recipes</span><span class="m">S1–S6, each sized for 1 credit</span></summary>
+      <details class="node"><summary><span class="t">6 searches were good enough to keep</span><span class="m">Each one sized for 1 credit before pulling</span></summary>
         <div class="more"><table class="mini">
           <tr><th>Recipe</th><th>Matches</th><th>Hit rate in test</th></tr>
           <tr><td>S1 Health ops</td><td class="n">762</td><td>4 / 10</td></tr>
@@ -381,7 +396,7 @@
       </details>
     </div>
     <div class="col">
-      <details class="node"><summary><span class="t">Dropped 2 recipes</span><span class="m">Video AI · CV-engineer hiring</span></summary>
+      <details class="node"><summary><span class="t">2 searches were dropped</span><span class="m">They found the wrong companies (video ads, teams building their own vision)</span></summary>
         <div class="more"><ul>
           <li><b>S7 Video AI:</b> 3 of 15 "maybe", mostly generative video and ad tech.</li>
           <li><b>J2 CV hiring:</b> teams hiring core CV engineers are building their own (build, not buy). Kept as a signal idea instead.</li>
@@ -390,7 +405,7 @@
       </details>
     </div>
     <div class="col">
-      <details class="node gate"><summary><span class="t">Gate: Bala cuts the pull</span><span class="m">Proposed 1,660 → approved 600</span></summary>
+      <details class="node gate"><summary><span class="t">Approval: pull 600, not 1,660</span><span class="m">Pull small, learn, then decide if more is worth paying for</span></summary>
         <div class="more"><p>100 per segment × 6. Pull small, learn, then decide whether the rest is worth paying for.</p></div>
       </details>
     </div>
@@ -400,10 +415,10 @@
 <!-- ================= PHASE 2 ================= -->
 <section class="phase band" style="--c:#eaf6ef" aria-labelledby="p2">
   <div class="phead"><span class="num">02</span><span class="pname" id="p2">Pull companies · batch 1</span><span class="tag">A1</span><span class="cost">656 credits</span></div>
-  <div class="node main"><div class="sum"><span class="t">Pull 50 → read every row → decide → pull 50</span><span class="m">Optimise the search while it runs, per segment</span></div></div>
+  <div class="node main"><div class="sum"><span class="t">We pulled 50 at a time and read every row</span><span class="m">If the rows looked wrong, we fixed the search before the next 50</span></div></div>
   <div class="row">
     <div class="col">
-      <details class="node"><summary><span class="t">Resume the same query</span><span class="m">Insurance · lending · logistics · healthcare</span></summary>
+      <details class="node"><summary><span class="t">Good searches: kept going as they were</span><span class="m">Insurance, lending, logistics, healthcare</span></summary>
         <div class="more"><ul>
           <li>Changing a filter restarts results at page 1, so you pay again for rows you already have.</li>
           <li>Junk here was cheap to remove locally, so we resumed instead of re-filtering.</li>
@@ -412,7 +427,7 @@
       </details>
     </div>
     <div class="col">
-      <details class="node"><summary><span class="t">Re-filter mid-pull</span><span class="m">Construction v6 · robotics v6</span></summary>
+      <details class="node"><summary><span class="t">Noisy searches: fixed halfway</span><span class="m">Construction and robotics pulled the wrong kind of company</span></summary>
         <div class="more"><ul>
           <li>Construction: "reality capture" pulled motion-capture companies. Re-filtered.</li>
           <li>Robotics: half were integrators or hardware. Tilted to robot learning, autonomy and teleop.</li>
@@ -421,16 +436,16 @@
       </details>
     </div>
     <div class="col">
-      <details class="node gate"><summary><span class="t">One mistake: "as-built"</span><span class="m">−50 credits, rule added</span></summary>
+      <details class="node gate"><summary><span class="t">One mistake cost 50 credits</span><span class="m">"as-built" was read as "as" + "built"; now we size before every pull</span></summary>
         <div class="more"><p>The hyphen split it into "as" + "built", which matched 1,754 random companies. 50 junk rows are kept as evidence in <code>data/raw/discarded/</code>.</p><p><b>New rule:</b> size after every filter change, before pulling.</p></div>
       </details>
     </div>
   </div>
   <div class="stem arrow"></div>
-  <details class="node result" style="max-width:560px;margin:0 auto"><summary><span class="t" style="text-align:center">609 unique → 44 excluded → 565 candidates</span><span class="m" style="text-align:center">Free local merge, every exclusion keeps its reason</span></summary>
+  <details class="node result" style="max-width:560px;margin:0 auto"><summary><span class="t" style="text-align:center">609 companies, 44 thrown out, 565 left</span><span class="m" style="text-align:center">Every company we threw out keeps its reason</span></summary>
     <div class="more"><ul>
       <li>21 horizontal doc-AI competitors, 15 acquired/shell pages, 5 bad domains, 3 manual (Tennr built its own VLM).</li>
-      <li><b>Judgment call:</b> vertical apps that read documents inside a bigger workflow use the same words as competitors but are the ICP (same shape as Valerie Health). Kept. Companies whose product <i>is</i> the extraction are cut at the competitor check before scoring (27).</li>
+      <li><b>Judgment call:</b> vertical apps that read documents inside a bigger workflow use the same words as competitors but are the ICP (same shape as Valerie Health). Kept. Companies whose product <i>is</i> the extraction are cut at the competitor check before scoring (29).</li>
       <li>Moved to the Google Sheet: README, Candidates, Excluded, Credit Ledger.</li>
     </ul><span class="src">Workspace/scripts/merge.py · 02-List-Building/Sourcing/phase2-pull-log.md</span></div>
   </details>
@@ -439,16 +454,16 @@
 <!-- ================= PHASE 3 ================= -->
 <section class="phase band" style="--c:#fbf1e2" aria-labelledby="p3">
   <div class="phead"><span class="num">03</span><span class="pname" id="p3">Enrich: free data and signals first, paid last</span><span class="tag">A2</span><span class="cost">169 credits</span></div>
-  <div class="node main"><div class="sum"><span class="t">Is messy visual input core to their product?</span><span class="m">Cut with free data first. Pay only for the companies that survive.</span></div></div>
+  <div class="node main"><div class="sum"><span class="t">Does their product run on messy documents, photos or video?</span><span class="m">We cut with free data first and paid only for the companies that passed</span></div></div>
   <div class="stem arrow"></div>
   <div class="chain step-chain">
-    <details class="node"><summary><span class="t">Calibrate the rubric on known answers</span><span class="m">4 of 4 real customers survive · 4 of 4 known junk cut · 12 credits</span></summary>
+    <details class="node"><summary><span class="t">First we tested our rules on known answers</span><span class="m">All 4 real customers passed and all 4 junk companies failed · 12 credits</span></summary>
       <div class="more"><p>Before trusting the rubric on 565 companies, we ran it on VLM Run's real customers and on obvious junk. It sorted all 8 correctly, so we used it unchanged.</p><span class="src">01-Onboarding-GTM/Scorecard/phase3-calibration.md</span></div>
     </details>
     <div class="stem arrow"></div>
     <div class="node result count"><div class="sum"><span class="t"><b class="big">565</b> companies sourced from Blitz</span><span class="m">With the data Blitz already gave us: about text, industry, size, HQ</span></div></div>
     <div class="stem arrow"></div>
-    <details class="node"><summary><span class="t">Pass 1 · read each company's Blitz "about" text against the rubric</span><span class="m">Free (data already paid for) · 333 disqualified, each with its reason</span></summary>
+    <details class="node"><summary><span class="t">Step 1: we read each company's short description</span><span class="m">Free · 333 cut because paperwork, photos or video aren't central to what they sell</span></summary>
       <div class="more"><table class="mini">
         <tr><th>Why it was cut</th><th>Companies</th></tr>
         <tr><td>Core product isn't messy visual input</td><td class="n">226</td></tr>
@@ -462,12 +477,12 @@
     <div class="stem arrow"></div>
     <div class="node result count"><div class="sum"><span class="t"><b class="big">232</b> companies left</span></div></div>
     <div class="stem arrow"></div>
-    <details class="node"><summary><span class="t">Pass 2 · read their own website</span><span class="m">Free · product, security, integrations, developer and careers pages · 38 disqualified</span></summary>
+    <details class="node"><summary><span class="t">Step 2: we read their own website</span><span class="m">Free · product, security, developer and careers pages · 38 more cut</span></summary>
       <div class="more"><ul>
         <li>Each page answers one question: what enters the product, regulated data, which OCR tool they use today, whether they're developer-led.</li>
         <li>Saved for every company: visual core (yes / partly), modalities, a word-for-word evidence quote + URL, and flags (OCR, REG, DEP, VID, OWN).</li>
         <li>Cut: 37 whose product turned out not to be visual once the site was read, 1 that built its own VLM (PackageX).</li>
-        <li>26 sites couldn't be read (JavaScript walls), so we fell back to the Blitz text and flagged them.</li>
+        <li>Some sites couldn't be read by a script (JavaScript walls, bot checks), so we fell back to the Blitz text and flagged them. Later every one of them was re-opened in a real browser (see Phase 05).</li>
       </ul><span class="src">Workspace/scripts/fetch_web.py · fetch_deep.py · Workspace/data/web2/</span></div>
     </details>
     <div class="stem arrow"></div>
@@ -475,7 +490,7 @@
   </div>
   <div class="row">
     <div class="col">
-      <details class="node"><summary><span class="t">Hiring signal</span><span class="m">Free job boards first, then Blitz jobs · 28 credits</span></summary>
+      <details class="node"><summary><span class="t">Are they hiring AI engineers right now?</span><span class="m">Free job boards first, then Blitz jobs · 28 credits</span></summary>
         <div class="more"><ul>
           <li>35 companies checked on their public job boards (Greenhouse, Lever, Ashby, Workable). Free.</li>
           <li>104 checked with Blitz jobs data. Empty results are free, so it cost 28 credits.</li>
@@ -484,7 +499,7 @@
       </details>
     </div>
     <div class="col">
-      <details class="node"><summary><span class="t">Engineering team share</span><span class="m">Blitz department data · 1 credit per company</span></summary>
+      <details class="node"><summary><span class="t">Do they have engineers to plug in an API?</span><span class="m">Engineer count from Blitz · 1 credit per company</span></summary>
         <div class="more"><ul>
           <li>How many engineers each company has, and what share of staff that is. Tells us whether they can integrate an API.</li>
           <li>129 credits for the strongest 130 in this phase, then the other 64 at the start of Phase 4, so all 194 are covered.</li>
@@ -494,58 +509,68 @@
     </div>
   </div>
   <div class="stem arrow"></div>
-  <div class="node result" style="max-width:560px;margin:0 auto"><div class="sum"><span class="t" style="text-align:center">194 enriched companies → scoring</span><span class="m" style="text-align:center">169 credits in total: 12 calibration + 129 engineering + 28 hiring</span></div></div>
+  <div class="node result" style="max-width:560px;margin:0 auto"><div class="sum"><span class="t" style="text-align:center">194 companies went on to scoring</span><span class="m" style="text-align:center">169 credits in total: 12 testing + 129 engineer counts + 28 hiring</span></div></div>
 </section>
 
 <!-- ================= PHASE 4 ================= -->
 <section class="phase band" style="--c:#f3ecfa" aria-labelledby="p4">
   <div class="phead"><span class="num">04</span><span class="pname" id="p4">Score on evidence only</span><span class="tag">A3</span><span class="cost">64 credits</span></div>
-  <div class="node main"><div class="sum"><span class="t">100-point scorecard, every point with a source</span><span class="m">70 points for the need · 30 for the buyer · penalties for build-own</span></div></div>
-  <div class="row">
-    <div class="col">
-      <details class="node"><summary><span class="t">The need · 70</span><span class="m">Visual core 30 · messy 10 · modality 15 · extracting today 15</span></summary>
-        <div class="more"><ul>
-          <li>Visual core: yes 30, partly 12.</li>
-          <li>Messy input: fax, handwriting, scans, phone photos.</li>
-          <li>Modality: docs 5 · images 10 · video 15 (VLM Run's edge).</li>
-          <li>Extracting today: OCR, IDP or GPT/Claude stack = existing budget.</li>
-        </ul></div>
-      </details>
-    </div>
-    <div class="col">
-      <details class="node"><summary><span class="t">The buyer · 30</span><span class="m">Sensitive data 10 · timing 10 · buyable 10</span></summary>
-        <div class="more"><ul>
-          <li>Sensitive: HIPAA/PII 6 + VPC/on-prem/ZDR 4. SOC 2 alone doesn't count.</li>
-          <li>Timing: ML/AI hiring 7 + "launching soon" 3.</li>
-          <li>Buyable: 10–300 people 6 + ≥5 engineers 4.</li>
-        </ul></div>
-      </details>
-    </div>
-    <div class="col">
-      <details class="node"><summary><span class="t">Penalties</span><span class="m">Own vision −15 · services −10 · acquired −8</span></summary>
-        <div class="more"><p>A perfect buyer with no visual workload can't score above ~42.</p><span class="src">Workspace/scripts/score.py</span></div>
-      </details>
-    </div>
+  <div class="node main"><div class="sum"><span class="t">Every company gets a fit score out of 90</span><span class="m">A point only counts if we can show where it came from: their site, a job post or a number</span></div></div>
+  <div class="scorewrap">
+  <table class="score" aria-label="How the fit score works">
+    <thead><tr><th>What we check</th><th>Points</th><th>How a company earns them</th><th>Real example</th></tr></thead>
+    <tbody>
+      <tr class="grp"><td colspan="4">Do they need VLM Run? (up to 70)</td></tr>
+      <tr><td>Their product runs on documents, photos or video</td><td class="pts">30</td><td>Yes, it's the core = 30. Only partly = 12.</td><td>NikoHealth turns every incoming fax into an order</td></tr>
+      <tr><td>The input is messy</td><td class="pts">10</td><td>Their own pages mention faxes, handwriting, scans or phone photos.</td><td>MarvelX: "messy handwritten docs"</td></tr>
+      <tr><td>What kind of input</td><td class="pts">5 · 10 · 15</td><td>Documents 5, images 10, video 15 (video is where VLM Run is strongest).</td><td>Blitzz reads text during live video = 15</td></tr>
+      <tr><td>They already pull data out of documents</td><td class="pts">15</td><td>They run OCR or a GPT/Claude setup today, so there's a budget and a pipeline to replace.</td><td>Inflooens uses Claude + GPT-4o-mini on borrower files</td></tr>
+      <tr class="grp"><td colspan="4">Can they buy it? (up to 20)</td></tr>
+      <tr><td>They handle sensitive data</td><td class="pts">10</td><td>HIPAA or personal data named = 6. Need private cloud or zero data retention = 4 more.</td><td>Avallon AI requires zero data retention</td></tr>
+      <tr><td>They are the right size</td><td class="pts">10</td><td>10–300 staff = 6 (301–500 = 3). At least 5 engineers = 4 more.</td><td>Avallon AI: 15 staff, 5 engineers = 10</td></tr>
+      <tr class="grp"><td colspan="4">Minus points</td></tr>
+      <tr><td>They build their own vision or OCR models</td><td class="pts">−15</td><td>They say it themselves, on their site, LinkedIn or a job post.</td><td>Coral: "we built our own OCR stack"</td></tr>
+      <tr><td>They are really a services firm</td><td class="pts">−10</td><td>People do the work, not software.</td><td>ChartRequest's full-service records team</td></tr>
+      <tr><td>A bigger company owns them</td><td class="pts">−8</td><td>The parent company decides what they buy.</td><td>Humata Health (part of R1)</td></tr>
+      <tr class="tot"><td>Fit score</td><td class="pts">max 90</td><td colspan="2">Best real score is 85 (Avallon AI). #100 scores 51. Sellers of extraction or vision AI are cut before scoring.</td></tr>
+      <tr class="flag"><td><b>Act now</b> (a flag, not points)</td><td class="pts">yes / no</td><td>Something dated says "reach out now": hiring AI engineers, a new round, fast headcount growth, a new tech leader, a recent post about document pain.</td><td>38 of the hundred. Kept out of the score so a recent hire never beats a better fit.</td></tr>
+    </tbody>
+  </table>
   </div>
+  <p class="note">Missing data is not a zero. If we can't read a company's website, it is set aside as "not enough data", not scored low.</p>
   <div class="stem"></div>
   <div class="row">
     <div class="col">
-      <details class="node result"><summary><span class="t">Calibration</span><span class="m">Real customers land #8, #10, #12, #71</span></summary>
-        <div class="more"><p>No weight tuning needed. Scored with the same rules as everyone else.</p></div>
+      <details class="node result"><summary><span class="t">Real customers land near the top</span><span class="m">Basata ~#7 · CivilGrid ~#8 · Valerie Health ~#12 · Scan.com ~#141</span></summary>
+        <div class="more"><ul>
+          <li>VLM Run's 4 real customers were scored with exactly the same rules. No weights were tuned to make this happen.</li>
+          <li>We tested making "already pulls data out of documents" a tie-breaker instead of 15 points. 3 of the 4 customers fell to #28–#59, so it stays at 15 points.</li>
+          <li>Scan.com is the miss: its MRI imaging work only reads as "partly" visual on its site.</li>
+        </ul></div>
       </details>
     </div>
     <div class="col">
-      <details class="node result"><summary><span class="t">Stability</span><span class="m">Each weight ±20%: worst case 93 of 100 unchanged</span></summary>
-        <div class="more"><p>34 runs, average 99.3 of 100 unchanged. The ranking doesn't hinge on one weight.</p></div>
+      <details class="node result"><summary><span class="t">One weight can't flip the list</span><span class="m">Move any weight ±20%: at least 95 of the 100 stay</span></summary>
+        <div class="more"><p>34 runs, average 99.2 of 100 unchanged. The ranking doesn't hinge on one number.</p></div>
       </details>
     </div>
     <div class="col">
-      <details class="node result"><summary><span class="t">10 rows by hand</span><span class="m">4 fake points found → 4 rule fixes</span></summary>
+      <details class="node result"><summary><span class="t">We checked 10 rows by hand</span><span class="m">Found 4 fake points, fixed the rule behind each</span></summary>
         <div class="more"><ul>
           <li>Trust-center text, a marketing "watch video", a dated blog headline, weak quotes.</li>
           <li>Evidence now only counts from product/home/integrations/developer pages.</li>
           <li>Then every top-100 quote checked word for word: 100/100 verbatim.</li>
         </ul><span class="src">02-List-Building/QA/handcheck_10.md</span></div>
+      </details>
+    </div>
+    <div class="col">
+      <details class="node result"><summary><span class="t">We re-opened the 33 sites our script couldn't read</span><span class="m">24 read in a real browser · 9 still blocked, so set aside</span></summary>
+        <div class="more"><ul>
+          <li>Before, these 33 were scored from a short description and averaged 27, which made the biggest tie in the list.</li>
+          <li>Re-opened each in a browser and scored only on what the live site says. No bot checks were bypassed.</li>
+          <li>2 turned out to sell extraction or vision AI (xCures, DigsFact): cut. 5 build their own models: −15. Tidalwave and Cync already pull data out of loan documents.</li>
+          <li>9 were blocked, parked, for sale or gone: set aside as "not enough data" instead of a fake low score.</li>
+        </ul><span class="src">Workspace/data/site_recheck.csv · 01-Onboarding-GTM/Scorecard/scorecard.md</span></div>
       </details>
     </div>
   </div>
@@ -554,14 +579,14 @@
 <!-- ================= PHASE 5 ================= -->
 <section class="phase band" style="--c:#fbeaea" aria-labelledby="p5">
   <div class="phead"><span class="num">05</span><span class="pname" id="p5">Batch 2 → the hundred + segments</span><span class="tag">A4</span><span class="tag">A5</span><span class="cost">762 credits</span></div>
-  <div class="node main"><div class="sum"><span class="t">Raise the bar: learn from the top scorers, pull lookalikes</span><span class="m">Batch 1's #100 scored only 42</span></div></div>
+  <div class="node main"><div class="sum"><span class="t">Batch 1's #100 scored only 42, so we went looking for better</span><span class="m">We found more companies that look like our best scorers</span></div></div>
   <div class="lane"><span class="lane-l">Batch 2 · reran phases 2–4</span>
     <div class="chain">
-      <details class="node"><summary><span class="t">Commonalities of top scorers</span><span class="m">Software dev · founded 2010+ · 15–470 staff · intake / automation words</span></summary>
+      <details class="node"><summary><span class="t">What our best scorers have in common</span><span class="m">Software companies, founded 2010+, 15–470 staff, talk about intake and automation</span></summary>
         <div class="more"><p>The first 609 companies were held out so nothing was bought twice.</p></div>
       </details>
       <div class="stem arrow"></div>
-      <details class="node"><summary><span class="t">6 lookalike + 6 geo recipes + video v2</span><span class="m">US/GB/CA, then AU, NZ, IE, IL, SG, NL</span></summary>
+      <details class="node"><summary><span class="t">We searched for lookalikes in 9 countries</span><span class="m">US, UK, Canada, then Australia, NZ, Ireland, Israel, Singapore, Netherlands</span></summary>
         <div class="more"><table class="mini">
           <tr><th>Step</th><th>Credits</th></tr>
           <tr><td>Lookalike sourcing (6 segments)</td><td class="n">470</td></tr>
@@ -572,60 +597,61 @@
         </table><span class="src">Workspace/scripts/queries/batch2/</span></div>
       </details>
       <div class="stem arrow"></div>
-      <div class="node"><div class="sum"><span class="t">432 new → 155 kept → 349 combined pool</span><span class="m">Same free website read, same scorecard, rescored together</span></div></div>
+      <div class="node"><div class="sum"><span class="t">432 new companies, 155 passed, 349 in total</span><span class="m">Same free website read and same scorecard for both batches</span></div></div>
     </div>
   </div>
   <div class="stem arrow"></div>
-  <details class="node result" style="max-width:560px;margin:0 auto"><summary><span class="t" style="text-align:center">The hundred: #1 Avallon AI 85 · #100 MoveDocs 51</span><span class="m" style="text-align:center">73 at 60+ · 45 from batch 2 · no competitors on the list</span></summary>
+  <details class="node result" style="max-width:560px;margin:0 auto"><summary><span class="t" style="text-align:center">The hundred: #1 Avallon AI scores 85, #100 Pibit.AI scores 51</span><span class="m" style="text-align:center">71 score 60+ · 46 came from batch 2 · 38 flagged act now · no competitors</span></summary>
     <div class="more"><ul>
-      <li><b>Competitor check (0 credits):</b> every enriched company checked against its own words. 27 sell extraction, IDP or vision AI themselves (Concord, Notable Systems, TRUE, Informed.IQ, Heron Data, Candor…), so they compete for the same budget. Cut: 349 → 322 scored.</li>
-      <li>17 say in their own words (site, LinkedIn or job post) that they built their own OCR or vision models. They take the −15. Example: Coral ("we built our own OCR stack") sits at #28, pitched on hard cases, not replacement. Ties go to accounts with no penalty.</li>
-            <li>Calibration: Basata ~#10, CivilGrid ~#11, Valerie Health ~#17. Scan.com ~#106 (always the "partly" customer).</li>
-      <li>Robotics dropped out: best is Mind Robotics at #166 (own foundation models, −15). None showed video extraction today.</li>
-      <li>Every row: per-criterion scores, segment, title to contact, verbatim quote + URL.</li>
+      <li><b>Competitor check (0 credits):</b> we read every company in its own words. 29 sell extraction, IDP or vision AI themselves (Concord, Notable Systems, TRUE, Informed.IQ, Heron Data, xCures…), so they compete with VLM Run instead of buying it. Cut.</li>
+      <li><b>Not enough data:</b> 9 websites were still blocked or gone after a browser re-check. Set aside, not scored. 349 → 311 scored.</li>
+      <li>35 scored companies say they build their own OCR or vision models and take −15. Example: Coral ("we built our own OCR stack") sits at #48, pitched on hard cases, not replacement.</li>
+      <li>Ties go to: no penalty first, then companies already pulling data out of documents, then act-now accounts.</li>
+      <li>Robotics dropped out: best is Percepto at #103. None showed document or video extraction today.</li>
+      <li>Every row: points per criterion, act-now flag and reason, segment, title to contact, word-for-word quote + URL.</li>
     </ul><span class="src">Workspace/out/top100.csv · Sheet tabs Top 100, Scored, Enriched</span></div>
   </details>
   <div class="row">
     <div class="col">
-      <details class="node"><summary><span class="t">A · Regulated doc intake</span><span class="m">57 accounts · health, insurance, lending, legal</span></summary>
+      <details class="node"><summary><span class="t">Play A · Regulated paperwork</span><span class="m">58 accounts · health, insurance, lending, legal</span></summary>
         <div class="more"><p>Faxes, referrals, ACORD forms, pay stubs. Lead with accuracy on messy docs + ZDR, BAA, VPC. Proof: Valerie Health, Scan.com.</p></div>
       </details>
     </div>
     <div class="col">
-      <details class="node"><summary><span class="t">B · Field &amp; freight</span><span class="m">31 accounts · construction, logistics</span></summary>
+      <details class="node"><summary><span class="t">Play B · Field and freight</span><span class="m">30 accounts · construction, logistics</span></summary>
         <div class="more"><p>Drivers photograph BOLs and PODs; jobsite photos and plans. Lead with docs + photos in one API. Proof: CivilGrid.</p></div>
       </details>
     </div>
     <div class="col">
-      <details class="node"><summary><span class="t">C · Video-first</span><span class="m">12 accounts · dash cams, video inspection</span></summary>
+      <details class="node"><summary><span class="t">Play C · Video</span><span class="m">12 accounts · dash cams, video inspection</span></summary>
         <div class="more"><p>Footage at scale that needs searching. Buyer is the ML/data team. No customer proof yet.</p></div>
       </details>
     </div>
     <div class="col">
-      <details class="node gate"><summary><span class="t">Leave out</span><span class="m">Sells extraction or vision AI · built their own VLM</span></summary>
-        <div class="more"><p>Tennr, PackageX, Owl.co, horizontal doc-AI vendors, and the 27 extraction and vision-AI vendors cut at the competitor check (Concord, Notable Systems, TRUE…). Reference cases, not prospects.</p></div>
+      <details class="node gate"><summary><span class="t">Leave out</span><span class="m">Anyone who sells extraction or vision AI, or built their own VLM</span></summary>
+        <div class="more"><p>Tennr, PackageX, Owl.co, horizontal doc-AI vendors, and the 29 extraction and vision-AI vendors cut at the competitor check (Concord, Notable Systems, TRUE, xCures, DigsFact…). Reference cases, not prospects.</p></div>
       </details>
     </div>
   </div>
-  <p class="note">Inside every play one split changes the message: already extracting → "replace your OCR + LLM stack"; not yet → "build it right the first time".</p>
+  <p class="note">Inside every play, one question changes the message: already pulling data out of documents → "replace your OCR + LLM stack"; not yet → "build it right the first time".</p>
 </section>
 
 <!-- ================= PHASE 6 ================= -->
 <section class="phase band" style="--c:#e5f3f3" aria-labelledby="p6">
   <div class="phead"><span class="num">06</span><span class="pname" id="p6">Scale it to the whole market</span><span class="tag">A6</span><span class="cost">0 credits</span></div>
-  <div class="node main"><div class="sum"><span class="t">From 100 to every company that fits</span><span class="m">Answered from saved search sizes, no new spend</span></div></div>
+  <div class="node main"><div class="sum"><span class="t">How far could this go beyond 100?</span><span class="m">Worked out from the search sizes we already had, no new spend</span></div></div>
   <div class="row">
     <div class="col">
-      <details class="node"><summary><span class="t">Market size</span><span class="m">~2,300 tight matches · ~1,000 pulled</span></summary>
+      <details class="node"><summary><span class="t">About 2,300 companies match our searches</span><span class="m">We pulled ~1,000 of them; 1 in 10 made the top grade</span></summary>
         <div class="more"><ul>
-          <li>Funnel: 1,000 → 322 (32%) → 100 (10%).</li>
+          <li>Funnel: 1,000 → 311 scored (31%) → 100 (10%).</li>
           <li>Inference: the other ~1,300 hold another 100–130 top-grade accounts.</li>
           <li>Loose universe ~12,000 at ~30% fit → low thousands of real fits.</li>
         </ul><span class="src">01-Onboarding-GTM/Segments-and-Market/a5-a6.md</span></div>
       </details>
     </div>
     <div class="col">
-      <details class="node"><summary><span class="t">Unit cost</span><span class="m">~19 credits per top-100 account</span></summary>
+      <details class="node"><summary><span class="t">Each top account cost about 19 credits</span><span class="m">The next ~1,300 would cost ~2,600, so we stopped under our cap</span></summary>
         <div class="more"><ul>
           <li>Batch 2 alone: ~16 per top-100 account.</li>
           <li>Next ~1,300 matches ≈ 2,600 credits: above our remaining working cap, so not run.</li>
@@ -634,7 +660,7 @@
       </details>
     </div>
     <div class="col">
-      <details class="node"><summary><span class="t">9 things that break</span><span class="m">All of them happened to us</span></summary>
+      <details class="node"><summary><span class="t">9 things that break at scale</span><span class="m">All of them happened to us here</span></summary>
         <div class="more"><ul>
           <li>Keyword splitting · filter changes restart pages · docs wrong on cost · shared pool</li>
           <li>Fake evidence · search labels ≠ what they do · unreadable sites / LLM drift</li>
@@ -643,11 +669,11 @@
       </details>
     </div>
     <div class="col">
-      <details class="node gate"><summary><span class="t">Side quest: GitHub</span><span class="m">Weak for this ICP, one real find</span></summary>
+      <details class="node gate"><summary><span class="t">Side quest: GitHub</span><span class="m">Mostly a dead end for these buyers, with one real find</span></summary>
         <div class="more"><ul>
           <li>Stargazer lists are closed (404). Forks, issues and code search still work, free.</li>
           <li>127 people around VLM Run's repos → 0 matches to our 349 (students, solo devs, platforms).</li>
-          <li><b>Zeitro (#67):</b> public code sends borrower PDFs and photos to OpenAI vision. The exact stack VLM Run replaces.</li>
+          <li><b>Zeitro (#69):</b> public code sends borrower PDFs and photos to OpenAI vision. The exact stack VLM Run replaces.</li>
           <li>Competitor repos: recent stars recovered from the public events feed (353 stars, 329 people, 60 list a company). Not yet matched.</li>
         </ul><span class="src">03-Outreach/Side-Quests/github-signal.md</span></div>
       </details>
@@ -659,11 +685,11 @@
 
 <!-- ================= PHASE 7 ================= -->
 <section class="phase band" style="--c:#fcf3d8" aria-labelledby="p7">
-  <div class="phead"><span class="num">07</span><span class="pname" id="p7">Turn the list into outreach</span><span class="tag">B1</span><span class="tag">B2</span><span class="tag">B3</span><span class="tag">B4</span><span class="cost">195 Crustdata credits</span></div>
-  <div class="node main"><div class="sum"><span class="t">Right moment · right people · emails an engineer answers</span><span class="m">Designed, not sent. Nobody contacted.</span></div></div>
+  <div class="phead"><span class="num">07</span><span class="pname" id="p7">Turn the list into outreach</span><span class="tag">B1</span><span class="tag">B2</span><span class="tag">B3</span><span class="tag">B4</span><span class="cost">198 Crustdata credits</span></div>
+  <div class="node main"><div class="sum"><span class="t">Reach the right person, at the right moment, with an email an engineer would answer</span><span class="m">Designed, not sent. Nobody was contacted.</span></div></div>
   <div class="row">
     <div class="col">
-      <details class="node"><summary><span class="t">B1 · Signals</span><span class="m">9 company · 5 people signals</span></summary>
+      <details class="node"><summary><span class="t">B1 · When to reach out</span><span class="m">9 company signals and 5 people signals</span></summary>
         <div class="more"><ul>
           <li><b>Company:</b> ML/doc-AI hiring, job post naming Textract/Tesseract, new intake product page, compliance page, funding, marketplace listing, public LLM-vision code, repo activity, VLM Run signup.</li>
           <li><b>People:</b> new CTO/Head of AI (90 days), customer champion moved, OCR-pain post, event speaker, engaged with VLM Run posts.</li>
@@ -672,7 +698,7 @@
       </details>
     </div>
     <div class="col">
-      <details class="node"><summary><span class="t">B2 · People</span><span class="m">30 DM · 40 influencer · 40 champion titles</span></summary>
+      <details class="node"><summary><span class="t">B2 · Who to email</span><span class="m">110 job titles in 3 groups: decision maker, influencer, champion</span></summary>
         <div class="more"><ul>
           <li>Blitz people search → Blitz waterfall ranks decision maker &gt; influencer &gt; champion.</li>
           <li>Email-finder waterfall → MillionVerifier: valid → <code>sendable.csv</code>.</li>
@@ -681,7 +707,7 @@
       </details>
     </div>
     <div class="col">
-      <details class="node"><summary><span class="t">B3 · Copy</span><span class="m">3 emails + signal version per play</span></summary>
+      <details class="node"><summary><span class="t">B3 · What to say</span><span class="m">3 short emails per play, plus a version for when a signal fires</span></summary>
         <div class="more"><ul>
           <li>25–55 words, one fact each, CTA offers to run their samples and send the JSON.</li>
           <li>All 12 emails pass the house spam scan.</li>
@@ -690,7 +716,7 @@
       </details>
     </div>
     <div class="col">
-      <details class="node"><summary><span class="t">B4 · Personalization</span><span class="m">5 real examples, sources shown</span></summary>
+      <details class="node"><summary><span class="t">B4 · One line about them</span><span class="m">Written from a quote on their own site · 5 real examples</span></summary>
         <div class="more"><ul>
           <li>Inflooens: Claude Sonnet 4 for PDFs, GPT-4o-mini for images.</li>
           <li>NikoHealth: an incoming fax becomes a pre-filled order.</li>
@@ -703,22 +729,23 @@
     </div>
   </div>
   <div class="stem arrow"></div>
-  <details class="node result" style="max-width:640px;margin:0 auto"><summary><span class="t" style="text-align:center">Signals checked live on the top 100 (Crustdata)</span><span class="m" style="text-align:center">36 of 100 have a timing signal right now · 195 credits</span></summary>
+  <details class="node result" style="max-width:640px;margin:0 auto"><summary><span class="t" style="text-align:center">We checked live signals on all 100 (Crustdata)</span><span class="m" style="text-align:center">34 have a dated reason to reach out now · 198 credits</span></summary>
     <div class="more"><table class="mini">
       <tr><th>What we pulled</th><th>Companies</th></tr>
       <tr><td>Headcount growth + last funding</td><td class="n">98</td></tr>
-      <tr><td>Job posts naming OCR / Textract / document AI / computer vision (161 posts)</td><td class="n">29 (8 strong)</td></tr>
-      <tr><td>Tech decision makers and founders, names + LinkedIn only (163 people)</td><td class="n">93</td></tr>
-      <tr><td>Decision maker new in role in the last 90 days</td><td class="n">2</td></tr>
-      <tr><td>LinkedIn post about document pain since May (82 posts read)</td><td class="n">19</td></tr>
-      <tr><td>OCR / document processing or computer vision in their tech stack</td><td class="n">12</td></tr>
+      <tr><td>Job posts naming OCR / Textract / document AI / computer vision (170 posts)</td><td class="n">30 (8 strong)</td></tr>
+      <tr><td>Tech decision makers and founders, names + LinkedIn only (163 people)</td><td class="n">92</td></tr>
+      <tr><td>Decision maker new in role in the last 90 days</td><td class="n">1</td></tr>
+      <tr><td>LinkedIn post about document pain since May (82 posts read)</td><td class="n">18</td></tr>
+      <tr><td>OCR / document processing or computer vision in their tech stack</td><td class="n">11</td></tr>
     </table>
     <ul>
-      <li><b>Pain in their own words:</b> xCures (#98) "scanned faxes… still show up as PDFs, TIFFs, and JPGs"; Murphi.ai's founder: photo of a handwritten OASIS form → structured in a minute; FurtherAI (#76): ~100 of 200 audit hours were manual extraction; BeSmartee (#3): "Borrower documents still arrive as PDFs".</li>
+      <li><b>Pain in their own words:</b> Murphi.ai's founder: photo of a handwritten OASIS form → structured in a minute; FurtherAI (#96): ~100 of 200 audit hours were manual extraction; BeSmartee (#3): "Borrower documents still arrive as PDFs"; Luma Health (#12): one customer pushes 600k+ faxes a year through its fax product.</li>
       <li><b>Already shipping OCR on photos</b> (a stack to replace): GoFormz, Encircle, LoadProof, Bold Penguin (handwritten notes).</li>
       <li><b>Signals also check fit:</b> Coral ("we built our own OCR stack") and iCustoms ("our IDP architecture") take the −15; iCustoms drops out of the hundred.</li>
-      <li><b>Outmarket (#11), Wyre AI (#31):</b> fresh rounds, team up 40–50%, hiring for document AI. <b>Pace (#13):</b> Series B, team +53%, hiring ML.</li>
-      <li><b>Transflo (#35):</b> new SVP of AI since 1 Sep. <b>xCures (#98):</b> new VP of Engineering since 1 Nov, plus a Series B. <b>Digs (#93), Lama AI (#92):</b> rounds since June.</li>
+      <li><b>Outmarket (#8), Wyre AI (#51):</b> fresh rounds, team up 40–50%, hiring for document AI. <b>Pace (#24):</b> Series B, team +53%, hiring ML.</li>
+      <li><b>Transflo (#29):</b> new SVP of AI since 1 Sep. <b>Digs (#89), Lama AI (#88):</b> rounds since June.</li>
+      <li>These signals, plus AI hiring on their own sites, set the <b>act now</b> flag on 38 of the hundred.</li>
       <li>Tech stack search found generic OCR tags only, no named vendor (Textract, Google Vision, ABBYY) for any of the 100.</li>
       <li>Lost 5.49 credits (two pulls) to a filter that returned empty rows; re-ran both.</li>
     </ul><span class="src">Sheet tab "Crustdata enrichment" · 03-Outreach/Signals-People-Copy/crustdata-signals.md</span></div>
@@ -728,13 +755,13 @@
 <!-- ================= PHASE 8 ================= -->
 <section class="phase band" style="--c:#eceffa" aria-labelledby="p8">
   <div class="phead"><span class="num">08</span><span class="pname" id="p8">The system: what runs when</span><span class="tag">B5</span></div>
-  <div class="node main"><div class="sum"><span class="t">The same pipeline, running on its own</span><span class="m">Each layer feeds the next; signals decide timing, not targeting</span></div></div>
+  <div class="node main"><div class="sum"><span class="t">The same pipeline, running on its own</span><span class="m">Each layer feeds the next. Signals decide when, the fit score decides who.</span></div></div>
   <div class="stem"></div>
   <div class="sys" role="table" aria-label="Operating system: layers, what happens, cadence">
     <div class="h" role="columnheader">Layer</div><div class="h" role="columnheader">What happens</div><div class="h" role="columnheader">Runs when</div>
     <div class="k">Sources</div><div>Blitz company search (tight + lookalike recipes), new geographies, marketplaces, hiring search</div><div class="w">Quarterly · after each recipe change: size first</div>
     <div class="k">Enrichment</div><div>Free website read + public ATS → visual core, modalities, flags, verbatim quote. Paid headcount on survivors only</div><div class="w">On every new company · monthly refresh, top 300</div>
-    <div class="k">Scoring</div><div><code>score.py</code>: 100 points, evidence only. Canary: the 4 real customers must stay near the top</div><div class="w">After every enrichment run</div>
+    <div class="k">Scoring</div><div><code>score.py</code>: fit score out of 90, evidence only, plus the act-now flag. Unreadable sites are set aside, not scored. Check: the real customers must stay near the top</div><div class="w">After every enrichment run</div>
     <div class="k">Segments</div><div>Play A regulated docs · B field &amp; freight · C video-first · leave-out group</div><div class="w">Set by score run</div>
     <div class="k">Signals</div><div>Hiring + named-tool job posts, headcount growth, funding, new leaders, document-pain posts (Crustdata), site diffs, VLM Run signups</div><div class="w">Daily signups · weekly jobs · monthly sites &amp; people</div>
     <div class="k">People</div><div>Title lists → Blitz search → waterfall → email finders → MillionVerifier → BounceBan → <code>sendable.csv</code></div><div class="w">When an account enters a play · monthly re-check</div>
@@ -759,7 +786,7 @@
     <div role="listitem"><b>1,921</b><span>of 10,000 · 6,000 reserve untouched</span></div>
   </div>
   <p class="note">Phases 6–8 used no Blitz credits. Lost to mistakes: 50 ("as-built") + 2 (wrong Peak Health domain).</p>
-  <p class="note">Crustdata (separate account): 194.65 of 199 credits on top-100 signals in Phase 07. 5.49 lost to a bad filter (twice).</p>
+  <p class="note">Crustdata (separate account): 197.80 of 199 credits on top-100 signals in Phase 07. 5.49 lost to a bad filter (twice). The 33-site re-check cost 0.</p>
 </section>
 
 <footer>
@@ -800,22 +827,24 @@
 
   <h3 id="wu-a3"><span class="sec">A3</span>Score</h3>
   <ul>
-    <li>100 points, evidence only. <b>70 for the need</b> (visual core, messy input, video, extracting today) and <b>30 for the buyer</b> (sensitive data, hiring now, right size).</li>
-    <li>Minus points for building their own vision models, being a services firm, or being acquired.</li>
-    <li>Checked three ways: real customers land #14, #17 and #26 · moving any weight ±20% keeps 93+ of the top 100 · 10 rows checked by hand → 4 rule fixes.</li>
+    <li>Fit score out of 90, evidence only. <b>70 for the need</b> (product runs on documents/photos/video, messy input, video, already extracting today) and <b>20 for the buyer</b> (sensitive data, right size).</li>
+    <li>Minus points for building their own vision models, being a services firm, or being owned by a bigger company.</li>
+    <li><b>Act now</b> is a separate flag (AI hiring, a new round, fast growth, a new tech leader, a recent post about document pain). It never adds points, so a recent hire can't beat a better fit. 38 of the hundred have it.</li>
+    <li>Unreadable website = "not enough data", set aside, not scored as zero. We re-opened all 33 in a browser: 24 re-scored on what the live site says, 9 set aside.</li>
+    <li>Checked three ways: real customers land ~#7, ~#8 and ~#12 (Scan.com ~#141 is the miss) · moving any weight ±20% keeps 95+ of the top 100 · 10 rows checked by hand → 4 rule fixes.</li>
   </ul>
 
   <h3 id="wu-a4"><span class="sec">A4</span>The hundred</h3>
   <ul>
-    <li>#1 Avallon AI 85 → #100 MoveDocs 51. 73 of 100 score 60+.</li>
-    <li><b>Competitor check:</b> 27 companies that sell extraction or vision AI themselves were cut, and 17 that built their own OCR or vision models take −15 (e.g. Coral, #28). Every account left reads messy docs, photos or video inside its own product and doesn't sell that as the product.</li>
+    <li>#1 Avallon AI 85 → #100 Pibit.AI 51 (out of 90). 71 of 100 score 60+.</li>
+    <li><b>Competitor check:</b> 29 companies that sell extraction or vision AI themselves were cut, and companies that built their own OCR or vision models take −15 (e.g. Coral, #48). Every account left reads messy docs, photos or video inside its own product and doesn't sell that as the product.</li>
     <li>Every row: scores, play, who to contact, a verified quote. In the Sheet, tab <b>Top 100</b>.</li>
   </ul>
 
   <h3 id="wu-a5"><span class="sec">A5</span>Segments</h3>
   <ul>
-    <li><b>A · Regulated doc intake (56):</b> lead with accuracy plus zero retention, BAA and VPC.</li>
-    <li><b>B · Field &amp; freight (32):</b> lead with docs and photos in one API.</li>
+    <li><b>A · Regulated doc intake (58):</b> lead with accuracy plus zero retention, BAA and VPC.</li>
+    <li><b>B · Field &amp; freight (30):</b> lead with docs and photos in one API.</li>
     <li><b>C · Video-first (12):</b> lead with video into JSON.</li>
     <li>Leave out anyone who sells extraction or vision AI, and anyone who built their own VLM.</li>
   </ul>
@@ -834,14 +863,14 @@
     <li><b>Company:</b> hiring ML/doc-AI engineers, job posts naming Textract or Tesseract, a new intake product page, VLM Run signups.</li>
     <li><b>People:</b> a new CTO or Head of AI, a customer champion who moved, someone posting about OCR pain.</li>
     <li>A strong signal sends the signal email within 48h. Signals change timing, not targeting.</li>
-    <li><b>Checked live with Crustdata:</b> 36 of the top 100 have a signal now: 8 are hiring engineers for OCR or document extraction, 19 posted about document pain (e.g. xCures on scanned faxes), Transflo and xCures have a new engineering/AI leader, and Pace, Outmarket, Digs and Lama AI raised recently. The posts also catch fit problems: Coral and iCustoms built their own OCR/IDP, so they take −15. Full table in the sheet tab <b>Crustdata enrichment</b>.</li>
+    <li><b>Checked live with Crustdata:</b> 34 of the top 100 have a signal now: 8 are hiring engineers for OCR or document extraction, 18 posted about document pain (e.g. Luma Health on fax volume), Transflo has a new SVP of AI, and Pace, Outmarket, Digs and Lama AI raised recently. Together with AI hiring on their own sites, 38 are flagged act now. The posts also catch fit problems: Coral and iCustoms built their own OCR/IDP, so they take −15. Full table in the sheet tab <b>Crustdata enrichment</b>.</li>
   </ul>
 
   <h3 id="wu-b2"><span class="sec">B2</span>People</h3>
   <ul>
     <li>30 / 40 / 40 titles → Blitz people search → waterfall (decision maker &gt; influencer &gt; champion) → email finders → MillionVerifier → BounceBan for catch-alls → one <code>sendable.csv</code>.</li>
     <li>No email found → LinkedIn only.</li>
-    <li><b>Tested on the top 100:</b> Crustdata found tech decision makers or founders at 93 of 100 (163 people, names and LinkedIn only, nobody contacted).</li>
+    <li><b>Tested on the top 100:</b> Crustdata found tech decision makers or founders at 92 of 100 (163 people, names and LinkedIn only, nobody contacted).</li>
   </ul>
 
   <h3 id="wu-b3"><span class="sec">B3</span>Copy</h3>
@@ -856,7 +885,7 @@
     <li><b>Examples:</b> Inflooens (Claude + GPT-4o-mini for documents) · NikoHealth (fax → pre-filled order) · Zeitro (phone photos of pay stubs) · Alvys (driver BOL photos) · Blitzz (OCR in live video).</li>
   </ul>
 
-  <p class="wu-end"><b>1,921 of 10,000 Blitz credits and 194.65 of 199 Crustdata credits spent. Nobody contacted.</b> Full detail sits behind each box in the flowchart.</p>
+  <p class="wu-end"><b>1,921 of 10,000 Blitz credits and 197.80 of 199 Crustdata credits spent. Nobody contacted.</b> Full detail sits behind each box in the flowchart.</p>
   <a class="back" href="#flow">← Back to the flowchart</a>
 </main>
 </section>
@@ -1018,7 +1047,7 @@ Should I send a sample output from a public dash-cam clip?</div>
 You joined {COMPANY} to lead ML this {MONTH}, which usually means picking the video stack for the next year.
 
 VLM Run turns raw footage into structured JSON through one API, so there's no per-event model to train first. Want me to run five of your clips?</div>
-        <p class="tip">No video account in our data showed a live signal, so this one is a template.</p>
+        <p class="tip">No video account in our data has a new ML leader yet, so this one is a template. (FleetSafe.Ai's team grew 71% in 6 months, the strongest video signal we found.)</p>
       </article>
     </div>
   </section>
